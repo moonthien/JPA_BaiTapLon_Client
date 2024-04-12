@@ -650,7 +650,7 @@ public class Frm_KhachHang extends JFrame implements ActionListener, MouseListen
 		String cccd = txtCCCD.getText();
 		for (int i = 0; i < table.getRowCount(); i++) {
 			if (cccd.equals(table.getValueAt(i, 5).toString()) && !cccd.equals(table.getValueAt(row, 5))) {
-				JOptionPane.showMessageDialog(this, "CCCD đã tồn tại");
+				JOptionPane.showMessageDialog(this, "CCCD đã tồn tại  e");
 				return false;
 
 			}
