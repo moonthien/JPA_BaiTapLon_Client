@@ -27,7 +27,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import client.Client;
+import client.Client_KhachHangDao;
 //import connectDB.*;
 //import dao.DanhSachKhachHang;
 //import dao.Dao_PhatSinhMa;
@@ -63,7 +63,7 @@ public class Frm_KhachHang extends JFrame implements ActionListener, MouseListen
 //	DanhSachKhachHang dsKh;
 	Panel pnQLKH;
 	JPanel panel, pnDSP;
-	private Client dsClientKH, dsClientLKH, dsClientLoad;
+	private Client_KhachHangDao dsClientKH;
 
 //	public Panel getFrmQuanLyKhachHang() {
 //		return this.pnQLKH;
@@ -266,9 +266,8 @@ public class Frm_KhachHang extends JFrame implements ActionListener, MouseListen
 
 		Socket socket = new Socket("DESKTOP-R9M9IMC", 3481);
 
-		dsClientKH = new Client();
-//		dsClientLKH = new Client();
-//		dsClientLoad = new Client();
+		dsClientKH = new Client_KhachHangDao();
+
 
 		try {
 			upTable();
@@ -371,15 +370,17 @@ public class Frm_KhachHang extends JFrame implements ActionListener, MouseListen
 	}
 
 	public void upTable() throws ClassNotFoundException, IOException {
-		int i = 0;
+		int i = 1;
 		List<KhachHang> list = dsClientKH.getDSKH();
-		LoaiKhachHang loaiKhachHang = dsClientKH.getLoaiKhachHang(1);
+//		LoaiKhachHang loaiKhachHang = dsClientKH.getLoaiKhachHang(2);
+		List<LoaiKhachHang> listLoaiKH = dsClientKH.getDSLKH();
 		
 		for (KhachHang kh : list) {
+			
 			Object[] obj = new Object[7];
 			obj[0] = kh.getMaKhachHang();
 			obj[1] = kh.getHoTenKhachHang();
-			obj[2] = loaiKhachHang.getTenLoaiKhachHang();
+			obj[2] = listLoaiKH.get(kh.getLoaiKhachHang().getMaLoaiKhachHang()-1).getTenLoaiKhachHang();
 			obj[3] = kh.isGioiTinh() ? "Nam" : "Nữ";
 			obj[4] = kh.getSoDienThoai().trim();
 			obj[5] = kh.getSoCCCD().trim();
@@ -404,11 +405,10 @@ public class Frm_KhachHang extends JFrame implements ActionListener, MouseListen
 				gioitinh = false;
 //			LoaiKhachHang lkh = new LoaiKhachHang("NOR", "Khách hàng thường");
 			LoaiKhachHang loaiKhachHang = dsClientKH.getLoaiKhachHang(1);
-		
-			System.out.println(loaiKhachHang);
+
 			KhachHang kh = new KhachHang(ten, cccd, dt, 1, gioitinh, loaiKhachHang);
 			dsClientKH.themKhachHang(kh);
-			System.out.println(kh);
+
 			List<KhachHang> list = dsClientKH.getDSKH();
 			KhachHang kh1 = list.get(list.size()-1);
 			System.out.println(list.size());

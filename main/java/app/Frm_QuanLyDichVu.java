@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -35,12 +36,12 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
-import com.toedter.calendar.JDateChooser;
-
-import connectDB.ConnectDB;
-import dao.DanhSachDichVu;
-import dao.DanhSachKhachHang;
-import dao.Dao_PhatSinhMa;
+//import com.toedter.calendar.JDateChooser;
+//
+//import connectDB.ConnectDB;
+//import dao.DanhSachDichVu;
+//import dao.DanhSachKhachHang;
+//import dao.Dao_PhatSinhMa;
 
 import entitys.DichVu;
 import entitys.KhachHang;
@@ -59,6 +60,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import client.Client_DichVuDao;
+
 public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseListener {
 	private JPanel pnDSDichVu, pnTTDV;
 	private JLabel lbDSDichVu, lbBGQLDV, lbTTDV, lbLoaiDichVu, lbTenDV, lbSoLuongTon, lbDonGia, lbTB, lbIconSearch,
@@ -72,15 +75,15 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 	private JScrollPane scrollPane;
 	private DefaultTableModel model;
 	KeyStroke keyStrokeCTRL1, keyStrokeCTRL2, keyStrokeCTRL3;
-	DanhSachDichVu dsDV;
+	private Client_DichVuDao dsClientDV;
 	DecimalFormat df;
 	DecimalFormat dfslt;
 
-	public Panel getFrmQuanLyDichVu() {
-		return this.pnQLDV;
-	}
+//	public Panel getFrmQuanLyDichVu() {
+//		return this.pnQLDV;
+//	}
 
-	public Frm_QuanLyDichVu() throws SQLException {
+	public Frm_QuanLyDichVu() throws SQLException, IOException, ClassNotFoundException {
 		setTitle("QUẢN LÝ DỊCH VỤ");
 		setSize(1400, 670);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -89,7 +92,7 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 		gui();
 	}
 
-	public void gui() throws SQLException {
+	public void gui() throws SQLException, IOException, ClassNotFoundException {
 		getContentPane().setLayout(null);
 
 		pnQLDV = new Panel();
@@ -135,7 +138,7 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 		pnTTDV.add(lbDonGia);
 
 		comboLDV = new JComboBox();
-		comboLDV.setModel(new DefaultComboBoxModel(new String[] { "Thực phẩm", "Nước uống" }));
+		comboLDV.setModel(new DefaultComboBoxModel(new String[] { "Đồ ăn", "Nước uống", "Khác" }));
 		comboLDV.setSelectedIndex(0);
 		comboLDV.setFont(new Font("Tahoma", Font.BOLD, 15));
 		comboLDV.setBounds(226, 29, 300, 30);
@@ -253,13 +256,10 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 		tableDSDichVu.addMouseListener(this);
 		lbIconSearch.addMouseListener(this);
 		lbIconSearchLTP.addMouseListener(this);
-		// kết nối data
-		ConnectDB.getInstance().connect();
-		// Danh sach Mat Hang
-		dsDV = new DanhSachDichVu();
-		upTable();
-		phanLoaiCombobox();
+//		// kết nối socket
+		dsClientDV = new Client_DichVuDao();
 
+		upTable();
 		// add và định nghĩa các hot key cho ứng dụng
 		keyStrokeCTRL1 = KeyStroke.getKeyStroke("ctrl 1");
 		keyStrokeCTRL2 = KeyStroke.getKeyStroke("ctrl 2");
@@ -271,7 +271,7 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 		addHotKey3();
 	}
 
-	public static void main(String[] args) throws SQLException {
+	public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException {
 		new Frm_QuanLyDichVu().setVisible(true);
 
 	}
@@ -285,14 +285,30 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 				btnThem.setText("Xác nhận");
 				btnSua.setText("Hủy");
 			} else if (btnThem.getText().equalsIgnoreCase("Xác nhận")) {
-				if (themDV()) {
-					btnSua.setText("Sửa (Ctrl 2)");
-					btnThem.setText("Thêm (Ctrl 1)");
+				try {
+					if (themDV()) {
+						btnSua.setText("Sửa (Ctrl 2)");
+						btnThem.setText("Thêm (Ctrl 1)");
+					}
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 			} else if (btnThem.getText().equals("Xác nhận ")) {
-				if (suaDichVu()) {
-					btnThem.setText("Thêm (Ctrl 1)");
-					btnSua.setText("Sửa (Ctrl 2)");
+				try {
+					if (suaDichVu()) {
+						btnThem.setText("Thêm (Ctrl 1)");
+						btnSua.setText("Sửa (Ctrl 2)");
+					}
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 			}
 		} else if (o.equals(btnSua)) {
@@ -304,13 +320,21 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 				btnSua.setText("Hủy");
 			}
 		} else if (o.equals(btnLamMoi)) {
-			clearTable();
+
 			xoaTrang();
-			upTable();
+//			
 
 		}
 		if (o == comboLDV) {
-			phanLoaiCombobox();
+			try {
+				phanLoaiCombobox();
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 
 	}
@@ -323,15 +347,17 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 	}
 
 	// Up thông tin lên bảng
-	public void upTable() {
+	public void upTable() throws ClassNotFoundException, IOException {
 		int i = 0;
 		df = new DecimalFormat("###,### VNĐ");
-		ArrayList<DichVu> list = dsDV.getDSDichVu();
-		for (DichVu dv : list) {
-			Object[] obj = new Object[7];
-			obj[0] = dv.getMaDichVu().trim();
+		// ArrayList<DichVu> list = dsDV.getDSDichVu();
+		List<LoaiDichVu> listLDV = dsClientDV.getDSLKH();
+		List<DichVu> listDV = dsClientDV.getDSDichVu();
+		for (DichVu dv : listDV) {
+			Object[] obj = new Object[5];
+			obj[0] = dv.getMaDichVu();
 			obj[1] = dv.getTenDichVu().trim();
-			obj[2] = dv.getloaiDichVu().getTenLoaiDichVu();
+			obj[2] = listLDV.get(dv.getLoaiDichVu().getMaLoaiDichVu() - 1).getTenLoaiDichVu();
 			obj[3] = dv.getSoLuongTon();
 			obj[4] = df.format(dv.getDonGia());
 			model.addRow(obj);
@@ -340,47 +366,48 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 	}
 
 	// thêm dịch vụ
-	public boolean themDV() {
+	public boolean themDV() throws ClassNotFoundException, IOException {
 		df = new DecimalFormat("###,### VNĐ");
 		Object[] obj = new Object[6];
 		if (ktraDuLieu()) {
-			Dao_PhatSinhMa matp1 = new Dao_PhatSinhMa();
-			String mada = matp1.getMaDATuDong();
-			String manu = matp1.getMaNUTuDong();
+//			Dao_PhatSinhMa matp1 = new Dao_PhatSinhMa();
+//			int mada = matp1.getMaDATuDong();
+//			String manu = matp1.getMaNUTuDong();
 			String loai = (String) comboLDV.getSelectedItem();
 			String tendv = (String) comboTDV.getSelectedItem();
-			LoaiDichVu ldv;
-			String ma;
-			if (loai.equals("Thực phẩm")) {
-				ma = mada;
-				ldv = new LoaiDichVu("FOOD", "Thực phẩm");
-
-			} else {
-				ldv = new LoaiDichVu("WATER", "Nước uống");
-				ma = manu;
-			}
+			LoaiDichVu ldv = dsClientDV.getDSLKH().get(comboLDV.getSelectedIndex());
+//			int ma;
+//			if (loai.equals("Thực phẩm")) {
+//				ma = mada;
+//				ldv = new LoaiDichVu("FOOD", "Thực phẩm");
+//
+//			} else {
+//				ldv = new LoaiDichVu("WATER", "Nước uống");
+//				ma = manu;
+//			}
 			int slt = Integer.parseInt(txtSoLuongTon.getText());
 			double giaban = Double.parseDouble(txtDonGia.getText());
 
-			DichVu dv = new DichVu(ma, tendv, ldv, slt, giaban);
+			DichVu dv = new DichVu(tendv, ldv, slt, giaban);
+			dsClientDV.themDichVu(dv);
+			List<DichVu> listDV = dsClientDV.getDSDichVu();
+			DichVu dv1 = listDV.get(listDV.size() - 1);
+			
+			JOptionPane.showMessageDialog(this, "Thêm thành công");
+			obj[0] = dv1.getMaDichVu();
+			obj[1] = tendv;
+			obj[2] = ldv.getTenLoaiDichVu();
+			obj[3] = slt;
+			obj[4] = df.format(giaban);
+			model.addRow(obj);
+			xoaTrang();
 
-			if (!dsDV.themDichVu(dv)) {
-				JOptionPane.showMessageDialog(this, "Thêm thành công");
-				obj[0] = ma;
-				obj[1] = tendv;
-				obj[2] = ldv.getTenLoaiDichVu();
-				obj[3] = slt;
-				obj[4] = df.format(giaban);
-				model.addRow(obj);
-				xoaTrang();
-				return true;
-			}
 		}
 		return false;
 	}
 
 	// update dịch vụ
-	public boolean suaDichVu() {
+	public boolean suaDichVu() throws ClassNotFoundException, IOException {
 		df = new DecimalFormat("###,### VNĐ");
 		int row = tableDSDichVu.getSelectedRow();
 		if (row == -1) {
@@ -388,26 +415,26 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 
 		} else {
 
-			Object[] obj = new Object[7];
+			Object[] obj = new Object[5];
 			if (ktraDuLieuSua()) {
-				String ma = (String) tableDSDichVu.getValueAt(row, 0);
+				int ma = (int) tableDSDichVu.getValueAt(row, 0);
 				String loai = (String) comboLDV.getSelectedItem();
 				String tendv = (String) comboTDV.getSelectedItem();
-				LoaiDichVu ldv;
-				if (loai.equals("Thực phẩm")) {
-					ldv = new LoaiDichVu("FOOD", "Thực phẩm");
-				} else {
-					ldv = new LoaiDichVu("WATER", "Nước uống");
-				}
+				LoaiDichVu ldv = dsClientDV.getDSLKH().get(comboLDV.getSelectedIndex());
+//				if (loai.equals("Thực phẩm")) {
+//					ldv = new LoaiDichVu("FOOD", "Thực phẩm");
+//				} else {
+//					ldv = new LoaiDichVu("WATER", "Nước uống");
+//				}
 				int slt = Integer.parseInt(txtSoLuongTon.getText());
 				double giaban = Double.parseDouble(txtDonGia.getText());
-				DichVu dv = new DichVu(ma, tendv, ldv, slt, giaban);
 				obj[0] = ma;
 				obj[1] = tendv;
 				obj[2] = ldv.getTenLoaiDichVu();
 				obj[3] = slt;
 				obj[4] = df.format(giaban);
-				if (!dsDV.suaDichVu(dv)) {
+				DichVu dv = new DichVu(ma, tendv, ldv, slt, giaban);
+				if(dsClientDV.updateDichVu(dv)){
 					JOptionPane.showMessageDialog(this, "Sửa thành công");
 					tableDSDichVu.setValueAt(obj[1], row, 1);
 					tableDSDichVu.setValueAt(obj[2], row, 2);
@@ -415,50 +442,55 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 					tableDSDichVu.setValueAt(obj[4], row, 4);
 					xoaTrang();
 					return true;
-
 				}
+
 			}
 		}
 		return false;
 	}
 
 	// Phân loại Dịch vụ
-	public void phanLoaiCombobox() {
+	public void phanLoaiCombobox() throws ClassNotFoundException, IOException {
 		String loai = String.valueOf(comboLDV.getSelectedItem());
-		ArrayList<DichVu> list = null;
+		List<DichVu> list = null;
 		comboTDV.removeAllItems();
-		if (loai.equals("Thực phẩm")) {
+		if (loai.equals("Đồ ăn")) {
 			comboTDV.removeAllItems();
-			list = dsDV.getDSDichVuTheoLoai("FOOD");
+			list = dsClientDV.getDSDichVuTheoLoaiDichVu(1);
+		} else if (loai.equals("Nước uống")) {
+			comboTDV.removeAllItems();
+			list = dsClientDV.getDSDichVuTheoLoaiDichVu(2);
 		} else {
 			comboTDV.removeAllItems();
-			list = dsDV.getDSDichVuTheoLoai("WATER");
+			list = dsClientDV.getDSDichVuTheoLoaiDichVu(3);
 		}
-		for (DichVu s : list) {
-			comboTDV.addItem(s.getTenDichVu());
+		for (DichVu dv : list) {
+			comboTDV.addItem(dv.getTenDichVu());
 		}
 
 	}
 
 // Lọc dịch vụ theo loại dịch vụ
-	public void locTheoLoaiDichVu() {
+	public void locTheoLoaiDichVu() throws ClassNotFoundException, IOException {
 		clearTable();
 		df = new DecimalFormat("###,### VNĐ");
 		String loai = String.valueOf(comboLDV.getSelectedItem());
-		String ma;
-		if (loai.equals("Thực phẩm")) {
-			ma = "FOOD";
+		int ma;
+		if (loai.equals("Đồ ăn")) {
+			ma = 1;
+		} else if (loai.equals("Nước uống")) {
+			ma = 2;
 		} else {
-			ma = "WATER";
+			ma = 3;
 		}
-		ArrayList<DichVu> list = dsDV.getDSDichVu();
+		List<DichVu> list = dsClientDV.getDSDichVu();
 		int i = 0;
 		for (DichVu dv : list) {
-			if (dv.getloaiDichVu().getMaLoaiDichVu().equals(ma)) {
+			if (dv.getLoaiDichVu().getMaLoaiDichVu()==ma) {
 				Object[] obj = new Object[6];
-				obj[0] = dv.getMaDichVu().trim();
+				obj[0] = dv.getMaDichVu();
 				obj[1] = dv.getTenDichVu();
-				obj[2] = dv.getloaiDichVu().getTenLoaiDichVu();
+				obj[2] = dv.getLoaiDichVu().getTenLoaiDichVu();
 				obj[3] = dv.getSoLuongTon();
 				obj[4] = df.format(dv.getDonGia());
 				model.addRow(obj);
@@ -467,18 +499,18 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 	}
 
 	// Lọc dịch vụ theo tên add kết quả lọc lên bảng
-	public void locTheoTenDichVu() {
+	public void locTheoTenDichVu() throws ClassNotFoundException, IOException {
 		clearTable();
 		df = new DecimalFormat("###,### VNĐ");
-		String tendv = (String)(comboTDV.getSelectedItem());
-		ArrayList<DichVu> list = dsDV.getDSDichVu();
+		String tendv = (String) (comboTDV.getSelectedItem());
+		List<DichVu> list = dsClientDV.getDSDichVu();
 		int i = 0;
 		for (DichVu dv : list) {
 			if (dv.getTenDichVu().equalsIgnoreCase(tendv)) {
 				Object[] obj = new Object[6];
-				obj[0] = dv.getMaDichVu().trim();
+				obj[0] = dv.getMaDichVu();
 				obj[1] = dv.getTenDichVu();
-				obj[2] = dv.getloaiDichVu().getTenLoaiDichVu();
+				obj[2] = dv.getLoaiDichVu().getTenLoaiDichVu();
 				obj[3] = dv.getSoLuongTon();
 				obj[4] = df.format(dv.getDonGia());
 				model.addRow(obj);
@@ -487,11 +519,11 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 	}
 
 	// Lọc dịch vụ theo tên dịch vụ
-	public void kiemTraTenDV() {
+	public void kiemTraTenDV() throws ClassNotFoundException, IOException {
 		String tendv = comboTDV.getSelectedItem().toString();
 		df = new DecimalFormat("#######");
 		dfslt = new DecimalFormat("####");
-		DichVu dv = dsDV.getDVTheoTen(tendv);
+		DichVu dv = dsClientDV.getDichVuTheoTen(tendv);
 		if (tendv.equals("")) {
 			JOptionPane.showMessageDialog(this, "Tên dịch vụ không được để trống");
 			comboTDV.requestFocus();
@@ -500,11 +532,11 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 			JOptionPane.showMessageDialog(this, "Tên dịch vụ viết hoa chữ cái đầu !");
 			comboTDV.requestFocus();
 		} else if (dv != null) {
-			String ldv = dv.getloaiDichVu().getTenLoaiDichVu();
+			String ldv = dv.getLoaiDichVu().getTenLoaiDichVu();
 			txtSoLuongTon.setText(dfslt.format(dv.getSoLuongTon()));
 			txtDonGia.setText(df.format(dv.getDonGia()));
 			locTheoTenDichVu();
-		}else {
+		} else {
 			JOptionPane.showMessageDialog(this, "Dịch vụ chưa có trong hệ thống \n Thêm dịch vụ mới!!!");
 			comboTDV.requestFocus();
 		}
@@ -668,9 +700,25 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 	public void mouseClicked(MouseEvent e) {
 		Object o = e.getSource();
 		if (o == lbIconSearch) {
-			kiemTraTenDV();
+			try {
+				kiemTraTenDV();
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} else if (o == lbIconSearchLTP) {
-			locTheoLoaiDichVu();
+			 try {
+				locTheoLoaiDichVu();
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} else {
 			setTextTB();
 		}

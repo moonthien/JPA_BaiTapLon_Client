@@ -14,13 +14,13 @@ import java.util.concurrent.CountDownLatch;
 import entitys.KhachHang;
 import entitys.LoaiKhachHang;
 
-public class Client {
+public class Client_KhachHangDao {
 	
 	private static ObjectOutputStream out ;
 	private static ObjectInputStream in;
 
 	
-	public Client() throws  IOException {
+	public Client_KhachHangDao() throws  IOException {
 	
 			try {
 				Socket socket = new Socket("DESKTOP-R9M9IMC", 3481);
@@ -36,28 +36,28 @@ public class Client {
 	}
 
 	public List<KhachHang> getDSKH() throws IOException, ClassNotFoundException {
-			out.writeInt(1);
+			out.writeUTF("getDSKH");
 			out.flush();
 			List<KhachHang> list = (List<KhachHang>) in.readObject();
 			return list;
 	}
 	
 	public List<LoaiKhachHang> getDSLKH() throws IOException, ClassNotFoundException {
-		out.writeInt(4);
+		out.writeUTF("getDSLKH");
 		out.flush();
 		List<LoaiKhachHang> list = (List<LoaiKhachHang>) in.readObject();
 		return list;
 	}
 	
 	public LoaiKhachHang getLoaiKhachHang(int id) throws IOException, ClassNotFoundException {
-		out.writeInt(2);
+		out.writeUTF("getLoaiKhachHang");
 		out.writeInt(id);
 		out.flush();
 		return (LoaiKhachHang) in.readObject();
 	}
 	
 	public boolean themKhachHang(KhachHang KhachHang) throws IOException, ClassNotFoundException {
-		out.writeInt(3);
+		out.writeUTF("themKhachHang");
 		out.flush();
 		
 		out.writeObject(KhachHang);
@@ -68,7 +68,7 @@ public class Client {
 	}
 
 	public boolean updateKhachHang(KhachHang KhachHang) throws IOException, ClassNotFoundException {
-        out.writeInt(5);
+		out.writeUTF("updateKhachHang");
         out.flush();
         out.writeObject(KhachHang);
         out.flush();
@@ -79,7 +79,7 @@ public class Client {
 	public static void main(String[] args) throws ClassNotFoundException, IOException {
 		
 		try {
-			Client client = new Client();
+			Client_KhachHangDao client = new Client_KhachHangDao();
 			List<LoaiKhachHang> list = client.getDSLKH();
 			
 
