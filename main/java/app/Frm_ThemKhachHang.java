@@ -26,8 +26,8 @@ import javax.swing.border.LineBorder;
 
 import com.toedter.calendar.JDateChooser;
 
-import dao.DanhSachKhachHang;
-import dao.Dao_PhatSinhMa;
+//import dao.DanhSachKhachHang;
+//import dao.Dao_PhatSinhMa;
 import entitys.KhachHang;
 import entitys.LoaiKhachHang;
 
@@ -51,7 +51,8 @@ public class Frm_ThemKhachHang extends JFrame implements ActionListener {
 	FixButton btnHuy, btnXacNhan, btnLamMoi;
 	private JTextField txtCCCD;
 	private JComboBox comboGT;
-	DanhSachKhachHang dsKH;
+	
+	//DanhSachKhachHang dsKH;
 	String sdt;
 	KhachHang kh;
 
@@ -64,7 +65,9 @@ public class Frm_ThemKhachHang extends JFrame implements ActionListener {
 		this.sdt = sdt;
 		gui();
 	}
-
+//	public static void main(String[] args) {
+//		n
+//	}
 	public void gui() {
 		getContentPane().setLayout(null);
 
@@ -166,7 +169,7 @@ public class Frm_ThemKhachHang extends JFrame implements ActionListener {
 		btnXacNhan.addActionListener(this);
 		btnLamMoi.addActionListener(this);
 
-		dsKH = new DanhSachKhachHang();
+		//dsKH = new DanhSachKhachHang();
 	}
 
 	@Override
@@ -194,56 +197,56 @@ public class Frm_ThemKhachHang extends JFrame implements ActionListener {
 		comboGT.setSelectedIndex(0);
 	}
 
-	public boolean ktraDuLieu() {
-		String ten = txtKhachHang.getText();
-		if (ten.equals("") || !ten.matches(
-				"^[A-Z][ A-Za-za-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ]*")) {
-			JOptionPane.showMessageDialog(this, "Tên không được để trống và viết hoa chữ cái đầu");
-			txtKhachHang.requestFocus();
-			return false;
-		}
-		String cccd = txtCCCD.getText();
-		DanhSachKhachHang dsKh = new DanhSachKhachHang();
-		ArrayList<KhachHang> list = dsKH.getDSKhachHang();
-		for (KhachHang kh : list) {
-			if (cccd.equals(kh.getSoCCCD())) {
-				JOptionPane.showMessageDialog(this, "Số CCCD đã tồn tại");
-				txtCCCD.requestFocus();
-				return false;
-			}
-		}
-		if (cccd.equals("") || !cccd.matches("^([0-9]{12})$")) {
-			JOptionPane.showMessageDialog(this, "Số CCCD không để trống và chỉ được 12 số");
-			txtCCCD.requestFocus();
-			return false;
-		}
-		return true;
-	}
+//	public boolean ktraDuLieu() {
+//		String ten = txtKhachHang.getText();
+//		if (ten.equals("") || !ten.matches(
+//				"^[A-Z][ A-Za-za-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ]*")) {
+//			JOptionPane.showMessageDialog(this, "Tên không được để trống và viết hoa chữ cái đầu");
+//			txtKhachHang.requestFocus();
+//			return false;
+//		}
+//		String cccd = txtCCCD.getText();
+//		DanhSachKhachHang dsKh = new DanhSachKhachHang();
+//		ArrayList<KhachHang> list = dsKH.getDSKhachHang();
+//		for (KhachHang kh : list) {
+//			if (cccd.equals(kh.getSoCCCD())) {
+//				JOptionPane.showMessageDialog(this, "Số CCCD đã tồn tại");
+//				txtCCCD.requestFocus();
+//				return false;
+//			}
+//		}
+//		if (cccd.equals("") || !cccd.matches("^([0-9]{12})$")) {
+//			JOptionPane.showMessageDialog(this, "Số CCCD không để trống và chỉ được 12 số");
+//			txtCCCD.requestFocus();
+//			return false;
+//		}
+//		return true;
+//	}
 
 	private boolean luuThongTinKhachHang() {
-		String tenKH = txtKhachHang.getText().trim();
-		String sCCD = txtCCCD.getText().trim();
-		String sdtKH = txtSDT.getText().trim();
-		int gt = comboGT.getSelectedIndex();
-		boolean gtt = (gt == 0) ? true : false;
-		Dao_PhatSinhMa psm = new Dao_PhatSinhMa();
-		String ma = psm.getMaKHCuoi();
-		Object[] obj = new Object[7];
-		LoaiKhachHang lkh = new LoaiKhachHang("NOR");
-		kh = new KhachHang(ma, tenKH, sCCD, sdtKH, 0, gtt, lkh);
-		if (ktraDuLieu() == true) {
-			if (!dsKH.themKhachHang(kh)) {
-				obj[0] = ma;
-				obj[1] = tenKH;
-				obj[2] = sCCD;
-				obj[3] = sdtKH;
-				obj[4] = gtt;
-				obj[5] = lkh;
-				obj[6] = 0;
-				xoaTrang();
-				return true;
-			}
-		}
+//		String tenKH = txtKhachHang.getText().trim();
+//		String sCCD = txtCCCD.getText().trim();
+//		String sdtKH = txtSDT.getText().trim();
+//		int gt = comboGT.getSelectedIndex();
+//		boolean gtt = (gt == 0) ? true : false;
+//		Dao_PhatSinhMa psm = new Dao_PhatSinhMa();
+//		String ma = psm.getMaKHCuoi();
+//		Object[] obj = new Object[7];
+//		LoaiKhachHang lkh = new LoaiKhachHang("NOR");
+//		kh = new KhachHang(ma, tenKH, sCCD, sdtKH, 0, gtt, lkh);
+//		if (ktraDuLieu() == true) {
+//			if (!dsKH.themKhachHang(kh)) {
+//				obj[0] = ma;
+//				obj[1] = tenKH;
+//				obj[2] = sCCD;
+//				obj[3] = sdtKH;
+//				obj[4] = gtt;
+//				obj[5] = lkh;
+//				obj[6] = 0;
+//				xoaTrang();
+//				return true;
+//			}
+//		}
 		return false;
 	}
 

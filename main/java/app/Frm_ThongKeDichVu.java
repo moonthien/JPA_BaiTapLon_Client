@@ -27,11 +27,14 @@ import javax.swing.border.TitledBorder;
 import com.mindfusion.scheduling.Cursor;
 import com.toedter.calendar.JDateChooser;
 
-import connectDB.ConnectDB;
-import dao.DanhSachDichVu;
-import dao.DanhSachHoaDon;
+import client.Client_DichVuDao;
+import client.Client_HoaDonDao;
+//import connectDB.ConnectDB;
+//import dao.DanhSachDichVu;
+//import dao.DanhSachHoaDon;
 import entitys.ChiTietHoaDon;
 import entitys.DichVu;
+import entitys.LoaiDichVu;
 import jiconfont.icons.FontAwesome;
 import jiconfont.swing.IconFontSwing;
 
@@ -46,9 +49,11 @@ import java.awt.ScrollPane;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 import javax.swing.UIManager;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Collections;
 
 public class Frm_ThongKeDichVu extends JFrame implements ActionListener, MouseListener {
@@ -72,8 +77,8 @@ public class Frm_ThongKeDichVu extends JFrame implements ActionListener, MouseLi
 	private JLabel lbltkdv, lbltgtk, lblnbd, lblnkt, lbliconthongke1, lbliconthongke2, lblbackground;
 	private JTableHeader tbHeader;
 	private JButton btnThongKe, btnLamMoi;
-	DanhSachDichVu dsDV;
-	DanhSachHoaDon dsHD;
+	Client_DichVuDao dsDV;
+	Client_HoaDonDao dsHD;
 	DichVu dv;
 	ChiTietHoaDon ct;
 	private JLabel lbTenDVDatNN1, lbTenDVDatNN;
@@ -82,15 +87,16 @@ public class Frm_ThongKeDichVu extends JFrame implements ActionListener, MouseLi
 		return this.panel_tong;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		new Frm_ThongKeDichVu().setVisible(true);
 
 	}
 
 	/**
 	 * Create the application.
+	 * @throws IOException 
 	 */
-	public Frm_ThongKeDichVu() {
+	public Frm_ThongKeDichVu() throws IOException {
 		setTitle("THỐNG KÊ DỊCH VỤ");
 		setSize(1400, 670);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -102,8 +108,9 @@ public class Frm_ThongKeDichVu extends JFrame implements ActionListener, MouseLi
 
 	/**
 	 * Initialize the contents of the frame.
+	 * @throws IOException 
 	 */
-	private void gui() {
+	private void gui() throws IOException {
 		getContentPane().setLayout(null);
 		panel_tong = new Panel();
 		panel_tong.setBounds(0, 0, 1400, 670);
@@ -295,26 +302,30 @@ public class Frm_ThongKeDichVu extends JFrame implements ActionListener, MouseLi
 		btnLamMoi.addActionListener(this);
 		table.addMouseListener(this);
 		// kết nối data
-		ConnectDB.getInstance().connect();
+//		ConnectDB.getInstance().connect();
 		// Danh sach Dịch Vụ, Hóa Đơn
-		dsDV = new DanhSachDichVu();
-		dsHD = new DanhSachHoaDon();
+		dsDV = new Client_DichVuDao();
+		dsHD = new Client_HoaDonDao();
 		dv = new DichVu();
 
 	}
 
 	/**
 	 * Đưa dữ liệu từ danh sách lên bảng
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 */
-	public void upTable(ArrayList<DichVu> list) {
+	public void upTable(ArrayList<DichVu> list) throws IOException, ClassNotFoundException {
 		int soluongdaban = 0;
 		int i;
 		Object[] obj = new Object[7];
 		for (DichVu dv : list) {
-			obj[0] = dv.getMaDichVu().trim();
+			obj[0] = dv.getMaDichVu();
 			obj[1] = dv.getTenDichVu().trim();
-			obj[2] = dv.getloaiDichVu().getTenLoaiDichVu();
-			soluongdaban = soDVTheoMaTheoNgay(dv.getMaDichVu().trim());
+			//LoaiDichVu ldv = dsDV.get
+			LoaiDichVu ldv = dsDV.getLoaiDichVu(dv.getLoaiDichVu().getMaLoaiDichVu());
+			obj[2] = ldv.getTenLoaiDichVu();
+			soluongdaban = soDVTheoMaTheoNgay(dv.getMaDichVu());
 			obj[3] = soluongdaban;
 			obj[4] = df.format(dv.getDonGia());
 			obj[5] = df.format((dv.getDonGia() * soluongdaban));
@@ -337,23 +348,28 @@ public class Frm_ThongKeDichVu extends JFrame implements ActionListener, MouseLi
 
 	// Thống kê số lần dịch vụ được đặt
 
-	public void loadThongKeDichVu() {
-		DichVu dv = new DichVu();
+	public void loadThongKeDichVu() throws ClassNotFoundException, IOException {
+//		DichVu dv = new DichVu();
+//		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
+//		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
+//		@SuppressWarnings("deprecation")
+//		Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
+//		@SuppressWarnings("deprecation")
+//		Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
+
 		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
 		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
-		@SuppressWarnings("deprecation")
-		Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
-		@SuppressWarnings("deprecation")
-		Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
-		if (ngayBatDau.before(ngayKetThuc) || ngayBatDau.equals(ngayKetThuc)) {
-			ArrayList<DichVu> listDV = dsHD.getDSDVTheoNgay(ngayBatDau, ngayKetThuc);
-			dv = dsHD.getDVDuocDatNhieuNhat(ngayBatDau, ngayKetThuc);
+		LocalDate ngayBatDau = utilngayBD.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		LocalDate ngayKetThuc = utilngayKT.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		if (ngayBatDau.isBefore(ngayKetThuc) || ngayBatDau.equals(ngayKetThuc)) {
+			ArrayList<DichVu> listDV = dsHD.getDSDichVuTheoNgay(ngayBatDau, ngayKetThuc);
+			DichVu dv = dsHD.getSoLanDichVuDatNNTrongNgay(ngayBatDau, ngayKetThuc);
 			if (dv == null) {
 				JOptionPane.showMessageDialog(this, "Chưa có dịch vụ để thống kê");
 			} else {
 
-				int tong = dsHD.getLanDatDVNNTheoMa(ngayBatDau, ngayKetThuc);
-				float tongdoanhthudv = dsHD.TongTienDV(ngayBatDau, ngayKetThuc);
+				int tong = soDVTheoMaTheoNgay(dv.getMaDichVu());
+ 				Map<Integer, Double> tongdoanhthudv = dsHD.tongTienDVTheoNgay(ngayBatDau, ngayKetThuc);
 				lblthongke1.setText("Số lần dịch vụ đặt:");
 				lbltongtk1.setText(String.valueOf(tong));
 				lbTenDVDatNN1.setText(dv.getTenDichVu());
@@ -372,17 +388,22 @@ public class Frm_ThongKeDichVu extends JFrame implements ActionListener, MouseLi
 	 * 
 	 * @param ma là mã dịch vụ
 	 * @return tổng số dịch vụ theo mã dịch vụ trong ngày được chọn thống kê
+	 * @throws IOException 
 	 */
-	public int soDVTheoMaTheoNgay(String ma) {
+	public int soDVTheoMaTheoNgay(int ma) throws IOException {
 		int tong = 0;
+//		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
+//		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
+////		DanhSachDichVu dao = new DanhSachDichVu();
+//		@SuppressWarnings("deprecation")
+//		Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
+//		@SuppressWarnings("deprecation")
+//		Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
 		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
 		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
-		DanhSachDichVu dao = new DanhSachDichVu();
-		@SuppressWarnings("deprecation")
-		Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
-		@SuppressWarnings("deprecation")
-		Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
-		tong = dsHD.getSoDVTheoMaTheoNgay(ma, ngayBatDau, ngayKetThuc);
+		LocalDate ngayBatDau = utilngayBD.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		LocalDate ngayKetThuc = utilngayKT.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		tong = dsHD.getTongSoDichVuTheoMaTheoNgay(ma, ngayBatDau, ngayKetThuc);
 		return tong;
 	}
 
@@ -481,7 +502,15 @@ public class Frm_ThongKeDichVu extends JFrame implements ActionListener, MouseLi
 			clearTable();
 			clearTK2();
 			loadThongKeSoGio();
-			loadThongKeDichVu();
+			try {
+				loadThongKeDichVu();
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} else if (o == btnLamMoi) {
 			resetAll();
 		}

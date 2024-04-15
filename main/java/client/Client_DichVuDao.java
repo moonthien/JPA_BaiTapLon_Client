@@ -143,6 +143,13 @@ public class Client_DichVuDao {
 		out.flush();
 		return in.readInt();
 	}
+	//getloaiDichVu
+	public LoaiDichVu getLoaiDichVu(int id) throws IOException, ClassNotFoundException {
+		out.writeUTF("getLoaiDichVu");
+		out.writeInt(id);
+		out.flush();
+		return (LoaiDichVu) in.readObject();
+	}
 	
 	public static void main(String[] args) throws ClassNotFoundException, IOException {
 

@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.awt.Color;
 import java.awt.Dimension;
 
@@ -29,12 +30,16 @@ import javax.swing.border.TitledBorder;
 import com.mindfusion.scheduling.Cursor;
 import com.toedter.calendar.JDateChooser;
 
-import connectDB.ConnectDB;
-import dao.DanhSachHoaDon;
-import dao.DanhSachKhachHang;
-import dao.DanhSachNhanVien;
+import client.Client_HoaDonDao;
+import client.Client_NhanVienDao;
+import client.Client_PhongDao;
+//import connectDB.ConnectDB;
+//import dao.DanhSachHoaDon;
+//import dao.DanhSachKhachHang;
+//import dao.DanhSachNhanVien;
 import entitys.HoaDonPhong;
 import entitys.KhachHang;
+import entitys.LoaiPhong;
 import entitys.NhanVien;
 import entitys.Phong;
 import jiconfont.icons.FontAwesome;
@@ -51,6 +56,7 @@ import java.awt.ScrollPane;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 
 public class Frm_ThongKePhong extends JFrame implements ActionListener, MouseListener {
@@ -76,21 +82,23 @@ public class Frm_ThongKePhong extends JFrame implements ActionListener, MouseLis
 	private JLabel lbltknv, lbltgtk, lblnbd, lblnkt, lbliconthongke1, lbliconthongke2, lblbackground;
 	private JTableHeader tbHeader;
 	private JButton btnThongKe, btnLamMoi;
-	DanhSachNhanVien dsNV;
-	DanhSachHoaDon dsHD;
+	Client_NhanVienDao dsNV;
+	Client_HoaDonDao dsHD;
+	Client_PhongDao dsPhong;
 
 	public Panel getFrmPhong() {
 		return this.panel_tong;
 	}
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		new Frm_ThongKePhong().setVisible(true);
 
 	}
 
 	/**
 	 * Create the application.
+	 * @throws IOException 
 	 */
-	public Frm_ThongKePhong() {
+	public Frm_ThongKePhong() throws IOException {
 		setTitle("THỐNG KÊ PHÒNG");
 		setSize(1400, 670);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -102,8 +110,9 @@ public class Frm_ThongKePhong extends JFrame implements ActionListener, MouseLis
 
 	/**
 	 * Initialize the contents of the frame.
+	 * @throws IOException 
 	 */
-	private void gui() {
+	private void gui() throws IOException {
 		getContentPane().setLayout(null);
 		panel_tong = new Panel();
 		panel_tong.setBounds(0, 0, 1400, 670);
@@ -285,23 +294,27 @@ public class Frm_ThongKePhong extends JFrame implements ActionListener, MouseLis
 		btnLamMoi.addActionListener(this);
 		table.addMouseListener(this);
 		// kết nối data
-		ConnectDB.getInstance().connect();
+//		ConnectDB.getInstance().connect();
 		// Danh sach Khach Hang
-		dsNV = new DanhSachNhanVien();
-		dsHD = new DanhSachHoaDon();
+		dsNV = new Client_NhanVienDao();
+		dsHD = new Client_HoaDonDao();
+		dsPhong = new Client_PhongDao();
 	}
 
 	/**
 	 * Đưa dữ liệu từ danh sách lên bảng
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 */
 
-	public void upTable(ArrayList<Phong> list) {
+	public void upTable(ArrayList<Phong> list) throws ClassNotFoundException, IOException {
 		int i = 0;
 		for (Phong p : list) {
 			Object[] obj = new Object[5];
 			obj[0] = p.getMaPhong();
 			obj[1] = p.getSucChua();
-			obj[2] = p.getMaLoaiPhong().getTenLoaiPhong();
+			List<LoaiPhong> listLoaiPhong = dsPhong.getDSLoaiPhong();
+			obj[2] = listLoaiPhong.get(p.getMaLoaiPhong().getMaLoaiPhong()-1).getTenLoaiPhong();
 			obj[3] = df.format(p.getGiaPhong());
 			obj[4] = dfdt.format(p.getDienTich());
 			if (table.getRowCount() == 0)
@@ -320,18 +333,24 @@ public class Frm_ThongKePhong extends JFrame implements ActionListener, MouseLis
 
 	/**
 	 * Thống kê số phòng theo ngày
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 */
-	public void loadThongKePhong() {
+	public void loadThongKePhong() throws ClassNotFoundException, IOException {
 
+//		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
+//		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
+//		@SuppressWarnings("deprecation")
+//		Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
+//		@SuppressWarnings("deprecation")
+//		Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
 		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
 		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
-		@SuppressWarnings("deprecation")
-		Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
-		@SuppressWarnings("deprecation")
-		Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
-		if (ngayBatDau.before(ngayKetThuc) || ngayBatDau.equals(ngayKetThuc)) {
-			ArrayList<Phong> listHD = dsHD.getDSPhongNgay(ngayBatDau, ngayKetThuc);
-			int tong = dsHD.tongSoPhongTheoNgay(ngayBatDau, ngayKetThuc);
+		LocalDate ngayBatDau = utilngayBD.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		LocalDate ngayKetThuc = utilngayKT.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		if (ngayBatDau.isBefore(ngayKetThuc) || ngayBatDau.equals(ngayKetThuc)) {
+			ArrayList<Phong> listHD = dsHD.getDSPhongTheoNgay(ngayBatDau, ngayKetThuc);
+			int tong = (int) dsHD.tongSoPhongTheoNgay(ngayBatDau, ngayKetThuc);
 			lblthongke1.setText("Tổng số phòng:");
 			lbltongtk1.setText(String.valueOf(tong));
 			upTable(listHD);
@@ -343,23 +362,32 @@ public class Frm_ThongKePhong extends JFrame implements ActionListener, MouseLis
 	 * 
 	 * @param ma là mã nhân viên
 	 * @return tổng số hóa đơn theo mã nhân viên trong ngày được chọn thống kê
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 */
-	public void KhungTheoMaTheoNgay() {
+	public void KhungTheoMaTheoNgay() throws ClassNotFoundException, IOException {
+//		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
+//		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
+//		@SuppressWarnings("deprecation")
+//		Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
+//		@SuppressWarnings("deprecation")
+//		Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
 		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
 		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
-		@SuppressWarnings("deprecation")
-		Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
-		@SuppressWarnings("deprecation")
-		Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
+		LocalDate ngayBatDau = utilngayBD.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		LocalDate ngayKetThuc = utilngayKT.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
 		int ca1 =0;
 		int ca2 =0;
 		int ca3 =0;
 		int ca4 =0;
 		int ca5 =0;
-		if (ngayBatDau.before(ngayKetThuc) || ngayBatDau.equals(ngayKetThuc)) {
+		if (ngayBatDau.isBefore(ngayKetThuc) || ngayBatDau.equals(ngayKetThuc)) {
 			ArrayList<HoaDonPhong> listHD = dsHD.getDSHDTheoNgay(ngayBatDau, ngayKetThuc);
+			System.out.println("45");
 			LocalTime timeAt9 = LocalTime.of(9, 0);
+			System.out.println("46");
 			LocalTime timeAt12 = LocalTime.of(12, 0);
+			System.out.println("47");
 			LocalTime timeAt15 = LocalTime.of(15, 0);
 			LocalTime timeAt18 = LocalTime.of(18, 0);
 			LocalTime timeAt21 = LocalTime.of(21, 0);
@@ -400,9 +428,11 @@ public class Frm_ThongKePhong extends JFrame implements ActionListener, MouseLis
 
 	/**
 	 * sự kiện click cột trong table hiện lên thống kê tổng số hóa đơn của nhân viên
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 * 
 	 */
-	public void setTextTB() {
+	public void setTextTB() throws ClassNotFoundException, IOException {
 		 KhungTheoMaTheoNgay();
 	}
 
@@ -412,11 +442,12 @@ public class Frm_ThongKePhong extends JFrame implements ActionListener, MouseLis
 	public void loadThongKeSoGio() {
 		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
 		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
-		@SuppressWarnings("deprecation")
-		Date ngayden = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
-		@SuppressWarnings("deprecation")
-		Date ngayKT = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
-		lbltg.setText(sf.format(ngayden) + " - " + sf.format(ngayKT));
+		LocalDate ngayden = utilngayBD.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		LocalDate ngayKT = utilngayKT.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String ngayDaDinhDang = ngayden.format(formatter);
+        String ngayDaDinhDang2 = ngayKT.format(formatter);
+		lbltg.setText(ngayDaDinhDang + " - " + ngayDaDinhDang2);
 
 	}
 
@@ -457,7 +488,15 @@ public class Frm_ThongKePhong extends JFrame implements ActionListener, MouseLis
 	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		setTextTB();
+		try {
+			setTextTB();
+		} catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 
 	@Override
@@ -492,11 +531,25 @@ public class Frm_ThongKePhong extends JFrame implements ActionListener, MouseLis
 		// TODO Auto-generated method stub
 		Object o = e.getSource();
 		if (o == btnThongKe) {
-			clearTable();
-			clearTK2();
+		//	clearTable();
+		//	clearTK2();
 			loadThongKeSoGio();
-			loadThongKePhong();
-			KhungTheoMaTheoNgay();
+			try {
+				loadThongKePhong();
+			} catch (ClassNotFoundException | IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+//			try {
+//				KhungTheoMaTheoNgay();
+//			} catch (ClassNotFoundException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (IOException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+			
 		} else if (o == btnLamMoi) {
 			resetAll();
 		}

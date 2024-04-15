@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -22,6 +23,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.SimpleTimeZone;
 
 import javax.swing.AbstractAction;
@@ -52,23 +54,28 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import org.apache.poi.examples.hsmf.Msg2txt;
 
-import connectDB.ConnectDB;
-
-import dao.DanhSachThuePhong;
-import dao.DanhSachDatPhong;
-import dao.DanhSachDichVu;
-import dao.DanhSachHoaDon;
-import dao.DanhSachPhong;
-import dao.DanhSachPhuThu;
-import dao.Dao_PhatSinhMa;
+//import connectDB.ConnectDB;
+//
+//import dao.DanhSachThuePhong;
+//import dao.DanhSachDatPhong;
+//import dao.DanhSachDichVu;
+//import dao.DanhSachHoaDon;
+//import dao.DanhSachPhong;
+//import dao.DanhSachPhuThu;
+//import dao.Dao_PhatSinhMa;
 import entitys.ChiTietHoaDon;
 import entitys.DichVu;
 import entitys.HoaDonPhong;
 import entitys.KhachHang;
 import entitys.LoaiHoaDon;
+import entitys.LoaiPhong;
 import entitys.NhanVien;
 import entitys.Phong;
+import entitys.TinhTrangPhong;
 import app.Frm_ChuyenPhong;
+import client.Client_HoaDonDao;
+import client.Client_KhachHangDao;
+import client.Client_PhongDao;
 
 public class Frm_ThuePhong extends JFrame implements MouseListener, ActionListener {
 	JPanel pnLoaiPhong, pnDSP, pnDSP1, pnCRUD, pnDSP2;
@@ -91,21 +98,25 @@ public class Frm_ThuePhong extends JFrame implements MouseListener, ActionListen
 	private SimpleDateFormat sf;
 	private DateTimeFormatter dt;
 	ButtonGroup bg;
-	DanhSachThuePhong dsTP;
-	DanhSachPhong dsPhong;
-	HoaDonPhong hdP;
-	DanhSachHoaDon dsHD;
-	DanhSachDichVu dsDV;
-	DanhSachPhuThu dsPT;
-	DanhSachDatPhong dsDP;
+//	DanhSachThuePhong dsTP;
+//	DanhSachPhong dsPhong;
+//	HoaDonPhong hdP;
+//	DanhSachHoaDon dsHD;
+//	DanhSachDichVu dsDV;
+//	DanhSachPhuThu dsPT;
+//	DanhSachDatPhong dsDP;
+	Client_PhongDao dsPhong;
+	Client_HoaDonDao dsHD;
+	Client_KhachHangDao dsKH;
 	NhanVien nv;
 	KeyStroke keyStrokeCTRL1, keyStrokeCTRL2, keyStrokeCTRL3, keyStrokeCTRL4, keyStrokeCTRL5;
 
-	Panel getFrmQuanLyThuePhong() {
-		return this.pnQLDP;
-	}
+//	Panel getFrmQuanLyThuePhong() {
+//		return this.pnQLDP;
+//	}
 
-	public Frm_ThuePhong(NhanVien nv) {
+//	public Frm_ThuePhong(NhanVien nv) throws IOException, ClassNotFoundException {
+		public Frm_ThuePhong() throws IOException, ClassNotFoundException {
 		setTitle("QUẢN LÝ Thuê phòng");
 		this.nv = nv;
 		setSize(1400, 670);
@@ -114,8 +125,9 @@ public class Frm_ThuePhong extends JFrame implements MouseListener, ActionListen
 		setLocationRelativeTo(null);
 		gui();
 	}
-
-	public void gui() {
+	
+	
+	public void gui() throws IOException, ClassNotFoundException {
 		getContentPane().setLayout(null);
 
 		pnQLDP = new Panel();
@@ -221,7 +233,7 @@ public class Frm_ThuePhong extends JFrame implements MouseListener, ActionListen
 		lbDSPhong.setFont(new Font("Tahoma", Font.BOLD, 15));
 		lbDSPhong.setBounds(10, 0, 150, 25);
 		pnDSP.add(lbDSPhong);
-		String col[] = { "Mã phòng", "Loại phòng", "Sức chứa", "Giá phòng", "Tình trạng" };
+		String col[] = { "Mã phòng", "Tình trạng ", "Sức chứa", "Loại phòng", "Giá phòng"};
 		model = new DefaultTableModel(col, 0) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
@@ -388,7 +400,7 @@ public class Frm_ThuePhong extends JFrame implements MouseListener, ActionListen
 		lbBGQLDP.setBounds(0, 0, 1400, 700);
 		pnQLDP.add(lbBGQLDP);
 		// kết nối data
-		ConnectDB.getInstance().connect();
+//		ConnectDB.getInstance().connect();
 
 		lbIconSearch.addMouseListener(this);
 		btnChuyenPhong.addActionListener(this);
@@ -404,20 +416,28 @@ public class Frm_ThuePhong extends JFrame implements MouseListener, ActionListen
 		btnTatCa.addActionListener(this);
 		radioDangThue.addActionListener(this);
 		radioTrong.addActionListener(this);
-		dsDP = new DanhSachDatPhong();
-		dsPhong = new DanhSachPhong();
-		dsTP = new DanhSachThuePhong();
-		dsHD = new DanhSachHoaDon();
-		dsDV = new DanhSachDichVu();
-		dsPT = new DanhSachPhuThu();
+//		dsDP = new DanhSachDatPhong();
+//		dsPhong = new DanhSachPhong();
+//		dsTP = new DanhSachThuePhong();
+//		dsHD = new DanhSachHoaDon();
+//		dsDV = new DanhSachDichVu();
+//		dsPT = new DanhSachPhuThu();
+		
+		dsPhong = new Client_PhongDao();
+		dsHD = new Client_HoaDonDao();
+		dsKH = new Client_KhachHangDao();
+		
 		df = new DecimalFormat("###,### VNĐ");
 		dfs = new DecimalFormat("### p");
 		dfh = new DecimalFormat("### h");
 		sf = new SimpleDateFormat("dd/MM/yyy");
 		dt = DateTimeFormatter.ofPattern("HH:mm");
 //		clearTable();
-//		upTable1();
-//		upTable2();
+		System.out.println("ok");
+		upTable1();
+
+		System.out.println("ok14");
+		upTable2();
 		// add và định nghĩa các hot key cho ứng dụng
 		keyStrokeCTRL1 = KeyStroke.getKeyStroke("ctrl 1");
 		keyStrokeCTRL2 = KeyStroke.getKeyStroke("ctrl 2");
@@ -431,39 +451,69 @@ public class Frm_ThuePhong extends JFrame implements MouseListener, ActionListen
 		addHotKey3();
 		addHotKey4();
 		addHotKey5();
-		lamMoi();
+//		lamMoi();
 	}
-
-	public void upTable1() {
-		int i = 3;
-		ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
-		for (Phong p : list) {
+//table Phong
+//	public void upTable1() {
+//		int i = 3;
+//		ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
+//		for (Phong p : list) {
+//			Object[] obj = new Object[5];
+//			obj[0] = p.getMaPhong().trim();
+//			obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//			obj[2] = p.getSucChua();
+//			obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
+//			obj[3] = df.format(p.getGiaPhong());
+//			if (p.getMaTinhTrangPhong().getMaTinhTrangPhong().trim().equals("BOOK")) {
+//				continue;
+//			}
+//			model.addRow(obj);
+//		}
+//	}
+	
+	public void upTable1() throws ClassNotFoundException, IOException {
+//		df = new DecimalFormat("###,### VNĐ");
+//		dfs = new DecimalFormat("### M2");
+	
+		List<Phong> dsPhongg = dsPhong.getDSPhong();
+	
+		List<TinhTrangPhong> list = dsPhong.getDSTinhTrangPhong();
+		List<LoaiPhong> list2 = dsPhong.getDSLoaiPhong();
+	//	model.setRowCount(0);
+	
+		for (Phong p : dsPhongg) {
 			Object[] obj = new Object[5];
-			obj[0] = p.getMaPhong().trim();
-			obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+			obj[0] = p.getMaPhong();
+		
+			obj[1] = list.get(p.getMaTinhTrangPhong().getMaTinhTrangPhong() - 1).getTenTinhTrangPhong();
+		
 			obj[2] = p.getSucChua();
-			obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
-			obj[3] = df.format(p.getGiaPhong());
-			if (p.getMaTinhTrangPhong().getMaTinhTrangPhong().trim().equals("BOOK")) {
-				continue;
-			}
+		
+			obj[3] = list2.get(p.getMaLoaiPhong().getMaLoaiPhong() - 1).getTenLoaiPhong();
+	
+			obj[4] = df.format(p.getGiaPhong());
+	
+			//obj[5] = dfs.format(p.getDienTich());
 			model.addRow(obj);
+		
 		}
-	}
+}
+	
 
-	public void upTable2() {
+	public void upTable2() throws ClassNotFoundException, IOException {
 		int i = 0;
 		ArrayList<HoaDonPhong> list = dsHD.getDSHDThue();
 		for (HoaDonPhong p : list) {
-			if (p.getMaLoaiHoaDon().getMaLoaiHoaDon().equals("HDT")) {
+			if (p.getMaLoaiHoaDon().getMaLoaiHoaDon() == 1) {
 				if(p.getNgayLapHoaDon().isBefore(LocalDate.now())) {
 					continue;
 				}
+				  KhachHang kh = dsKH.getKhachHangTheoMa(p.getMaKhachHang().getMaKhachHang());
 				Object[] obj = new Object[6];
-				obj[0] = p.getMaHoaDon().trim();
-				obj[1] = p.getPhong().getMaPhong().trim();
-				obj[2] = p.getMaKhachHang().getMaKhachHang().trim();
-				obj[3] = p.getMaKhachHang().getSoDienThoai().trim();
+				obj[0] = p.getMaHoaDon();
+				obj[1] = p.getPhong().getMaPhong();
+				obj[2] = p.getMaKhachHang().getMaKhachHang();
+				obj[3] = kh.getSoDienThoai().trim();
 				obj[4] = p.getNgayLapHoaDon();
 				obj[5] = p.getGioBatDauThue().format(dt);
 				model1.addRow(obj);
@@ -471,97 +521,97 @@ public class Frm_ThuePhong extends JFrame implements MouseListener, ActionListen
 		}
 	}
 
-	public void upTable3() {
-		clearTable3();
-		int i = 0;
-		int row = tableDSPhong2.getSelectedRow();
-		if (row >= 0) {
-			String ma = (String) tableDSPhong2.getValueAt(row, 0);
-			ArrayList<ChiTietHoaDon> list = dsTP.getCTHDDVTheoMa(ma);
-			for (ChiTietHoaDon p : list) {
-				if (p.getDichVu() != null) {
-					DichVu dv = dsDV.getDVTheoMa(p.getDichVu().getMaDichVu());
-					Object[] obj = new Object[7];
-					obj[0] = dv.getloaiDichVu().getTenLoaiDichVu();
-					obj[1] = dv.getTenDichVu();
-					obj[2] = dsDV.getSLTheoMaDV(p.getDichVu().getMaDichVu());
-					obj[3] = df.format(dsDV.getDGTheoMaDV(p.getDichVu().getMaDichVu()));
-					model2.addRow(obj);
-				}
-			}
-		}
-	}
+//	public void upTable3() {
+//		clearTable3();
+//		int i = 0;
+//		int row = tableDSPhong2.getSelectedRow();
+//		if (row >= 0) {
+//			String ma = (String) tableDSPhong2.getValueAt(row, 0);
+//			ArrayList<ChiTietHoaDon> list = dsTP.getCTHDDVTheoMa(ma);
+//			for (ChiTietHoaDon p : list) {
+//				if (p.getDichVu() != null) {
+//					DichVu dv = dsDV.getDVTheoMa(p.getDichVu().getMaDichVu());
+//					Object[] obj = new Object[7];
+//					obj[0] = dv.getloaiDichVu().getTenLoaiDichVu();
+//					obj[1] = dv.getTenDichVu();
+//					obj[2] = dsDV.getSLTheoMaDV(p.getDichVu().getMaDichVu());
+//					obj[3] = df.format(dsDV.getDGTheoMaDV(p.getDichVu().getMaDichVu()));
+//					model2.addRow(obj);
+//				}
+//			}
+//		}
+//	}
 
-	public boolean ktraRegex() {
-		String tenkh = txtKhachHang.getText();
-		String sdtkh = txtSDT.getText();
-		int row = tableDSPhong.getSelectedRow();
-		if (sdtkh.equals("")) {
-			JOptionPane.showMessageDialog(this, "Số điện thoại không được để trống");
-			txtSDT.requestFocus();
-			return false;
-		}
-		if (!sdtkh.matches("\\d{10}")) {
-			JOptionPane.showMessageDialog(this, "Số điện thoại không quá 10 số và ko có kí tự");
-			txtSDT.setText("");
-			txtSDT.requestFocus();
-			return false;
-		}
-		if (tenkh.equals("")) {
-			JOptionPane.showMessageDialog(this, "Tên khách hàng không được để trống");
-			return false;
-		}
-		if (row < 0) {
-			JOptionPane.showMessageDialog(this, "Chọn phòng cần thuê");
-			return false;
-		}
-		if (tableDSPhong.getValueAt(row, 4).toString().equals("Phòng đang thuê")) {
-			JOptionPane.showMessageDialog(this, "Phòng đã cho thuê!!!\n Chọn phòng khác");
-			return false;
-		}
-		return true;
-	}
+//	public boolean ktraRegex() {
+//		String tenkh = txtKhachHang.getText();
+//		String sdtkh = txtSDT.getText();
+//		int row = tableDSPhong.getSelectedRow();
+//		if (sdtkh.equals("")) {
+//			JOptionPane.showMessageDialog(this, "Số điện thoại không được để trống");
+//			txtSDT.requestFocus();
+//			return false;
+//		}
+//		if (!sdtkh.matches("\\d{10}")) {
+//			JOptionPane.showMessageDialog(this, "Số điện thoại không quá 10 số và ko có kí tự");
+//			txtSDT.setText("");
+//			txtSDT.requestFocus();
+//			return false;
+//		}
+//		if (tenkh.equals("")) {
+//			JOptionPane.showMessageDialog(this, "Tên khách hàng không được để trống");
+//			return false;
+//		}
+//		if (row < 0) {
+//			JOptionPane.showMessageDialog(this, "Chọn phòng cần thuê");
+//			return false;
+//		}
+//		if (tableDSPhong.getValueAt(row, 4).toString().equals("Phòng đang thuê")) {
+//			JOptionPane.showMessageDialog(this, "Phòng đã cho thuê!!!\n Chọn phòng khác");
+//			return false;
+//		}
+//		return true;
+//	}
+//
+//	public boolean ktraPhong() {
+//		int row = tableDSPhong.getSelectedRow();
+//		if (row < 0) {
+//			JOptionPane.showMessageDialog(this, "Chưa chọn phòng");
+//			return false;
+//		}
+//		if (tableDSPhong.getValueAt(row, 4).toString().equals("Phòng trống")) {
+//			JOptionPane.showMessageDialog(this, "Phòng chưa được thuê!!!\n Chọn phòng khác");
+//			return false;
+//		}
+//		return true;
+//	}
 
-	public boolean ktraPhong() {
-		int row = tableDSPhong.getSelectedRow();
-		if (row < 0) {
-			JOptionPane.showMessageDialog(this, "Chưa chọn phòng");
-			return false;
-		}
-		if (tableDSPhong.getValueAt(row, 4).toString().equals("Phòng trống")) {
-			JOptionPane.showMessageDialog(this, "Phòng chưa được thuê!!!\n Chọn phòng khác");
-			return false;
-		}
-		return true;
-	}
-
-	public boolean thuePhong() {
-		int row = tableDSPhong.getSelectedRow();
-		Dao_PhatSinhMa dao = new Dao_PhatSinhMa();
-		String maHD = dao.getMaHDCuoi();
-		String tenkh = txtKhachHang.getText();
-		String sdtkh = txtSDT.getText();
-		String map = (String) tableDSPhong.getValueAt(row, 0);
-		KhachHang kh = dsTP.ktraKHTheoSDt(sdtkh);
-		String makh = kh.getMaKhachHang();
-		String manv = nv.getMaNhanVien();
-		Phong p = new Phong(map);
-		LoaiHoaDon lhd = new LoaiHoaDon("HDT");
-		LocalDate ngaythue = LocalDate.now();
-		LocalTime giothue = LocalTime.now();
-		HoaDonPhong phong = new HoaDonPhong(maHD, p, nv, kh, lhd, ngaythue, giothue);
-		if (!dsTP.themHDThue(phong) && !dsTP.setTTPhongTheoMa(map, "RENT")) {
-			if (ngaythue.getDayOfWeek() == DayOfWeek.SATURDAY || ngaythue.getDayOfWeek() == DayOfWeek.SUNDAY) {
-				dsPT.themPTTheoMa(maHD);
-			}
-			JOptionPane.showMessageDialog(this, "Thuê phòng thành công");
-			clearTable();
-			upTable2();
-			upTable1();
-			return true;
-		}
-		return false;
-	}
+//	public boolean thuePhong() {
+//		int row = tableDSPhong.getSelectedRow();
+//		Dao_PhatSinhMa dao = new Dao_PhatSinhMa();
+//		String maHD = dao.getMaHDCuoi();
+//		String tenkh = txtKhachHang.getText();
+//		String sdtkh = txtSDT.getText();
+//		String map = (String) tableDSPhong.getValueAt(row, 0);
+//		KhachHang kh = dsTP.ktraKHTheoSDt(sdtkh);
+//		String makh = kh.getMaKhachHang();
+//		String manv = nv.getMaNhanVien();
+//		Phong p = new Phong(map);
+//		LoaiHoaDon lhd = new LoaiHoaDon("HDT");
+//		LocalDate ngaythue = LocalDate.now();
+//		LocalTime giothue = LocalTime.now();
+//		HoaDonPhong phong = new HoaDonPhong(maHD, p, nv, kh, lhd, ngaythue, giothue);
+//		if (!dsTP.themHDThue(phong) && !dsTP.setTTPhongTheoMa(map, "RENT")) {
+//			if (ngaythue.getDayOfWeek() == DayOfWeek.SATURDAY || ngaythue.getDayOfWeek() == DayOfWeek.SUNDAY) {
+//				dsPT.themPTTheoMa(maHD);
+//			}
+//			JOptionPane.showMessageDialog(this, "Thuê phòng thành công");
+//			clearTable();
+//			upTable2();
+//			upTable1();
+//			return true;
+//		}
+//		return false;
+//	}
 
 	public void clearTable1() {
 		while (tableDSPhong.getRowCount() > 0) {
@@ -588,232 +638,232 @@ public class Frm_ThuePhong extends JFrame implements MouseListener, ActionListen
 		clearTable3();
 	}
 
-	public void ktraKH() {
-		String sdt = txtSDT.getText();
-		KhachHang kh = dsTP.ktraKHTheoSDt(sdt);
-		if (sdt.equals("")) {
-			JOptionPane.showMessageDialog(this, "Số điện thoại không được để trống");
-			txtSDT.requestFocus();
-		} else if (!sdt.matches("\\d{10}")) {
-			JOptionPane.showMessageDialog(this, "Số điện thoại không quá 10 số và ko có kí tự");
-			txtSDT.setText("");
-			txtSDT.requestFocus();
-		} else if (kh != null) {
-			txtKhachHang.setText(kh.getHoTenKhachHang());
-			if (dsHD.getDSHDTheoMaKH(kh.getMaKhachHang()).size() > 0) {
-				new Frm_TTKH(sdt).setVisible(true);
-			}
-		} else {
-			JOptionPane.showMessageDialog(this, "Khách hàng chưa có trong hệ thống \nthêm khách hàng mới!!!");
-			Frm_ThemKhachHang frm_ThemKH = new Frm_ThemKhachHang(sdt);
-			frm_ThemKH.setVisible(true);
-		}
-	}
+//	public void ktraKH() {
+//		String sdt = txtSDT.getText();
+//		KhachHang kh = dsTP.ktraKHTheoSDt(sdt);
+//		if (sdt.equals("")) {
+//			JOptionPane.showMessageDialog(this, "Số điện thoại không được để trống");
+//			txtSDT.requestFocus();
+//		} else if (!sdt.matches("\\d{10}")) {
+//			JOptionPane.showMessageDialog(this, "Số điện thoại không quá 10 số và ko có kí tự");
+//			txtSDT.setText("");
+//			txtSDT.requestFocus();
+//		} else if (kh != null) {
+//			txtKhachHang.setText(kh.getHoTenKhachHang());
+//			if (dsHD.getDSHDTheoMaKH(kh.getMaKhachHang()).size() > 0) {
+//				new Frm_TTKH(sdt).setVisible(true);
+//			}
+//		} else {
+//			JOptionPane.showMessageDialog(this, "Khách hàng chưa có trong hệ thống \nthêm khách hàng mới!!!");
+//			Frm_ThemKhachHang frm_ThemKH = new Frm_ThemKhachHang(sdt);
+//			frm_ThemKH.setVisible(true);
+//		}
+//	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		Object o = e.getSource();
-		if (o == btnThuePhong) {
-			if (ktraRegex())
-				thuePhong();
-		}
-		if (o == btnLamMoi) {
-			lamMoi();
-		}
-		if (o == btnTatCa) {
-			lamMoi();
-		}
-		if (o == btnChuyenPhong) {
-			if (ktraPhong()) {
-				HoaDonPhong hd = getHDPDuocChon();
-				new Frm_ChuyenPhong(hd).setVisible(true);
-			}
-		}
-		if (o == btnTinhTien)
-			if (ktraPhong()) {
-				HoaDonPhong hd = getHDPDuocChon();
-				LocalTime giotra = LocalTime.now();
-				hd.setGioTraPhong(giotra);
-				new Frm_ThanhToan(hd).setVisible(true);
-			}
-		if (o == btnPhongVip) {
-			locTheoLoaiPhongVIP();
-		}
-		if (o == btnPhongThuong) {
-			locTheoLoaiPhongThuong();
-		}
-		if (o == radioDangThue) {
-			loaiPALL();
-		}
-		if (o == radioTrong) {
-			loaiPALL();
-		}
-		if (o == btnThemDV) {
-			if (ktraPhong()) {
-				HoaDonPhong hd = getHDPDuocChon();
-				new Frm_ThemDichVu(hd).setVisible(true);
-			}
-		}
+//		if (o == btnThuePhong) {
+//			if (ktraRegex())
+//				thuePhong();
+//		}
+//		if (o == btnLamMoi) {
+//			lamMoi();
+//		}
+//		if (o == btnTatCa) {
+//			lamMoi();
+//		}
+//		if (o == btnChuyenPhong) {
+//			if (ktraPhong()) {
+//				HoaDonPhong hd = getHDPDuocChon();
+//				new Frm_ChuyenPhong(hd).setVisible(true);
+//			}
+//		}
+//		if (o == btnTinhTien)
+//			if (ktraPhong()) {
+//				HoaDonPhong hd = getHDPDuocChon();
+//				LocalTime giotra = LocalTime.now();
+//				hd.setGioTraPhong(giotra);
+//				new Frm_ThanhToan(hd).setVisible(true);
+//			}
+//		if (o == btnPhongVip) {
+//			locTheoLoaiPhongVIP();
+//		}
+//		if (o == btnPhongThuong) {
+//			locTheoLoaiPhongThuong();
+//		}
+//		if (o == radioDangThue) {
+//			loaiPALL();
+//		}
+//		if (o == radioTrong) {
+//			loaiPALL();
+//		}
+//		if (o == btnThemDV) {
+//			if (ktraPhong()) {
+//				HoaDonPhong hd = getHDPDuocChon();
+//				new Frm_ThemDichVu(hd).setVisible(true);
+//			}
+//		}
 	}
 
-	public HoaDonPhong getHDPDuocChon() {
-		int row = tableDSPhong2.getSelectedRow();
-		String ma = (String) tableDSPhong2.getValueAt(row, 0);
-		HoaDonPhong hd = dsTP.getHDTheoMa(ma);
-		return hd;
-	}
+//	public HoaDonPhong getHDPDuocChon() {
+//		int row = tableDSPhong2.getSelectedRow();
+//		String ma = (String) tableDSPhong2.getValueAt(row, 0);
+//		HoaDonPhong hd = dsTP.getHDTheoMa(ma);
+//		return hd;
+//	}
 
-	public void loaiPALL() {
-		clearTable1();
-		if (radioDangThue.isSelected()) {
-			int i = 0;
-			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
-			for (Phong p : list) {
-				Object[] obj = new Object[6];
-				obj[0] = p.getMaPhong().trim();
-				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
-				obj[2] = p.getSucChua();
-				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
-				obj[3] = df.format(p.getGiaPhong());
-				if (p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("RENT"))
-					model.addRow(obj);
-			}
-		} else if (radioTrong.isSelected()) {
-			int i = 0;
-			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
-			for (Phong p : list) {
-				Object[] obj = new Object[6];
-				obj[0] = p.getMaPhong().trim();
-				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
-				obj[2] = p.getSucChua();
-				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
-				obj[3] = df.format(p.getGiaPhong());
-				if (p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("EMPT"))
-					model.addRow(obj);
-			}
-		}
-
-	}
+//	public void loaiPALL() {
+//		clearTable1();
+//		if (radioDangThue.isSelected()) {
+//			int i = 0;
+//			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
+//			for (Phong p : list) {
+//				Object[] obj = new Object[6];
+//				obj[0] = p.getMaPhong().trim();
+//				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//				obj[2] = p.getSucChua();
+//				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
+//				obj[3] = df.format(p.getGiaPhong());
+//				if (p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("RENT"))
+//					model.addRow(obj);
+//			}
+//		} else if (radioTrong.isSelected()) {
+//			int i = 0;
+//			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
+//			for (Phong p : list) {
+//				Object[] obj = new Object[6];
+//				obj[0] = p.getMaPhong().trim();
+//				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//				obj[2] = p.getSucChua();
+//				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
+//				obj[3] = df.format(p.getGiaPhong());
+//				if (p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("EMPT"))
+//					model.addRow(obj);
+//			}
+//		}
+//
+//	}
 
 	// Lọc phòng theo loại VIP
-	public void locTheoLoaiPhongVIP() {
-		clearTable1();
-		if (radioDangThue.isSelected()) {
-			int i = 0;
-			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
-			for (Phong p : list) {
-				Object[] obj = new Object[6];
-				obj[0] = p.getMaPhong().trim();
-				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
-				obj[2] = p.getSucChua();
-				obj[3] = df.format(p.getGiaPhong());
-				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
-				if (p.getMaLoaiPhong().getMaLoaiPhong().equals("VIP")
-						&& (p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("RENT")))
-					model.addRow(obj);
-			}
-		} else if (radioTrong.isSelected()) {
-			int i = 0;
-			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
-			for (Phong p : list) {
-				Object[] obj = new Object[6];
-				obj[0] = p.getMaPhong().trim();
-				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
-				obj[2] = p.getSucChua();
-				obj[3] = df.format(p.getGiaPhong());
-				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
-				if ((p.getMaLoaiPhong().getMaLoaiPhong().equals("VIP")
-						&& p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("EMPT")))
-					model.addRow(obj);
-			}
-		}else {
-			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
-			for (Phong p : list) {
-				Object[] obj = new Object[6];
-				obj[0] = p.getMaPhong().trim();
-				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
-				obj[2] = p.getSucChua();
-				obj[3] = df.format(p.getGiaPhong());
-				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
-				if ((p.getMaLoaiPhong().getMaLoaiPhong().equals("VIP")))
-					model.addRow(obj);
-			}
-		}
-	}
-
-	// Lọc phòng theo loại thường
-	public void locTheoLoaiPhongThuong() {
-		clearTable1();
-		if (radioDangThue.isSelected()) {
-			int i = 0;
-			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
-			for (Phong p : list) {
-				Object[] obj = new Object[6];
-				obj[0] = p.getMaPhong().trim();
-				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
-				obj[2] = p.getSucChua();
-				obj[3] = df.format(p.getGiaPhong());
-				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
-
-				if ((p.getMaLoaiPhong().getMaLoaiPhong().equals("NOR")
-						&& p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("RENT")))
-					model.addRow(obj);
-			}
-		} else if (radioTrong.isSelected()) {
-			int i = 0;
-			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
-			for (Phong p : list) {
-				Object[] obj = new Object[6];
-				obj[0] = p.getMaPhong().trim();
-				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
-				obj[2] = p.getSucChua();
-				obj[3] = df.format(p.getGiaPhong());
-				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
-				if ((p.getMaLoaiPhong().getMaLoaiPhong().equals("NOR")
-						&& p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("EMPT")))
-					model.addRow(obj);
-			}
-		}else {
-			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
-			for (Phong p : list) {
-				Object[] obj = new Object[6];
-				obj[0] = p.getMaPhong().trim();
-				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
-				obj[2] = p.getSucChua();
-				obj[3] = df.format(p.getGiaPhong());
-				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
-				if ((p.getMaLoaiPhong().getMaLoaiPhong().equals("NOR")))
-					model.addRow(obj);
-			}
-		}
-	}
-
-//uptable dichvu
-	public void upTableDV() {
-		int i = 0;
-		Object[] obj = new Object[6];
-		DanhSachDichVu dsdv = new DanhSachDichVu();
-		int row = tableDSPhong2.getSelectedRow();
-		String ma = (String) tableDSPhong2.getValueAt(row, 0);
-		HoaDonPhong hd = dsTP.getHDTheoMa(ma);
-		System.out.println(ma);
-		ArrayList<ChiTietHoaDon> listt = dsTP.getCTHDTheoMa(ma);
-		float tongtiendv = 0;
-		for (ChiTietHoaDon p : listt) {
-			DichVu dv = dsdv.getDVTheoMa(p.getDichVu().getMaDichVu());
-			obj[0] = p.getMaHoaDonPhong().getPhong().getMaPhong();
-			obj[1] = p.getDichVu().getloaiDichVu().getTenLoaiDichVu();
-			obj[2] = p.getDichVu().getTenDichVu();
-			obj[3] = dsdv.getSLTheoMaDV(p.getDichVu().getMaDichVu());
-			obj[4] = df.format(dsdv.getDGTheoMaDV(p.getDichVu().getMaDichVu()));
-			float tong = dsdv.getSLTheoMaDV(p.getDichVu().getMaDichVu())
-					* dsdv.getDGTheoMaDV(p.getDichVu().getMaDichVu());
-			tongtiendv += tong;
-			obj[5] = df.format(tong);
-			model2.addRow(obj);
-		}
-	}
+//	public void locTheoLoaiPhongVIP() {
+//		clearTable1();
+//		if (radioDangThue.isSelected()) {
+//			int i = 0;
+//			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
+//			for (Phong p : list) {
+//				Object[] obj = new Object[6];
+//				obj[0] = p.getMaPhong().trim();
+//				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//				obj[2] = p.getSucChua();
+//				obj[3] = df.format(p.getGiaPhong());
+//				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
+//				if (p.getMaLoaiPhong().getMaLoaiPhong().equals("VIP")
+//						&& (p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("RENT")))
+//					model.addRow(obj);
+//			}
+//		} else if (radioTrong.isSelected()) {
+//			int i = 0;
+//			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
+//			for (Phong p : list) {
+//				Object[] obj = new Object[6];
+//				obj[0] = p.getMaPhong().trim();
+//				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//				obj[2] = p.getSucChua();
+//				obj[3] = df.format(p.getGiaPhong());
+//				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
+//				if ((p.getMaLoaiPhong().getMaLoaiPhong().equals("VIP")
+//						&& p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("EMPT")))
+//					model.addRow(obj);
+//			}
+//		}else {
+//			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
+//			for (Phong p : list) {
+//				Object[] obj = new Object[6];
+//				obj[0] = p.getMaPhong().trim();
+//				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//				obj[2] = p.getSucChua();
+//				obj[3] = df.format(p.getGiaPhong());
+//				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
+//				if ((p.getMaLoaiPhong().getMaLoaiPhong().equals("VIP")))
+//					model.addRow(obj);
+//			}
+//		}
+//	}
+//
+//	// Lọc phòng theo loại thường
+//	public void locTheoLoaiPhongThuong() {
+//		clearTable1();
+//		if (radioDangThue.isSelected()) {
+//			int i = 0;
+//			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
+//			for (Phong p : list) {
+//				Object[] obj = new Object[6];
+//				obj[0] = p.getMaPhong().trim();
+//				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
+//				obj[2] = p.getSucChua();
+//				obj[3] = df.format(p.getGiaPhong());
+//				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//
+//				if ((p.getMaLoaiPhong().getMaLoaiPhong().equals("NOR")
+//						&& p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("RENT")))
+//					model.addRow(obj);
+//			}
+//		} else if (radioTrong.isSelected()) {
+//			int i = 0;
+//			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
+//			for (Phong p : list) {
+//				Object[] obj = new Object[6];
+//				obj[0] = p.getMaPhong().trim();
+//				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//				obj[2] = p.getSucChua();
+//				obj[3] = df.format(p.getGiaPhong());
+//				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
+//				if ((p.getMaLoaiPhong().getMaLoaiPhong().equals("NOR")
+//						&& p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("EMPT")))
+//					model.addRow(obj);
+//			}
+//		}else {
+//			ArrayList<Phong> list = dsDP.getAllRoomByDate(LocalDate.now().toString());
+//			for (Phong p : list) {
+//				Object[] obj = new Object[6];
+//				obj[0] = p.getMaPhong().trim();
+//				obj[4] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//				obj[2] = p.getSucChua();
+//				obj[3] = df.format(p.getGiaPhong());
+//				obj[1] = p.getMaLoaiPhong().getTenLoaiPhong();
+//				if ((p.getMaLoaiPhong().getMaLoaiPhong().equals("NOR")))
+//					model.addRow(obj);
+//			}
+//		}
+//	}
+//
+////uptable dichvu
+//	public void upTableDV() {
+//		int i = 0;
+//		Object[] obj = new Object[6];
+//		DanhSachDichVu dsdv = new DanhSachDichVu();
+//		int row = tableDSPhong2.getSelectedRow();
+//		String ma = (String) tableDSPhong2.getValueAt(row, 0);
+//		HoaDonPhong hd = dsTP.getHDTheoMa(ma);
+//		System.out.println(ma);
+//		ArrayList<ChiTietHoaDon> listt = dsTP.getCTHDTheoMa(ma);
+//		float tongtiendv = 0;
+//		for (ChiTietHoaDon p : listt) {
+//			DichVu dv = dsdv.getDVTheoMa(p.getDichVu().getMaDichVu());
+//			obj[0] = p.getMaHoaDonPhong().getPhong().getMaPhong();
+//			obj[1] = p.getDichVu().getloaiDichVu().getTenLoaiDichVu();
+//			obj[2] = p.getDichVu().getTenDichVu();
+//			obj[3] = dsdv.getSLTheoMaDV(p.getDichVu().getMaDichVu());
+//			obj[4] = df.format(dsdv.getDGTheoMaDV(p.getDichVu().getMaDichVu()));
+//			float tong = dsdv.getSLTheoMaDV(p.getDichVu().getMaDichVu())
+//					* dsdv.getDGTheoMaDV(p.getDichVu().getMaDichVu());
+//			tongtiendv += tong;
+//			obj[5] = df.format(tong);
+//			model2.addRow(obj);
+//		}
+//	}
 
 	public void clickTable1() {
 		tableDSPhong2.clearSelection();
@@ -838,15 +888,15 @@ public class Frm_ThuePhong extends JFrame implements MouseListener, ActionListen
 
 	public void lamMoi() {
 		clearTable();
-		upTable1();
-		upTable2();
+	//	upTable1();
+	//	upTable2();
 		txtSDT.setText("");
 		txtKhachHang.setText("");
 		tableDSPhong.clearSelection();
 		tableDSPhong2.clearSelection();
 		tableDSDichVu.clearSelection();
 		bg.clearSelection();
-		huyThuePhongQuaNgay();
+	//	huyThuePhongQuaNgay();
 	}
 
 	// hot key Ctrl1
@@ -905,36 +955,36 @@ public class Frm_ThuePhong extends JFrame implements MouseListener, ActionListen
 		});
 	}
 	// huy thue phong qua ngay
-	public void huyThuePhongQuaNgay() {
-		for (HoaDonPhong hd : dsHD.getDSHDThue()) {
-			String maHoaDon = hd.getMaHoaDon().trim();
-			String ngay = hd.getNgayLapHoaDon().toString();
-			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-			LocalDate ngayThue = LocalDate.parse(ngay);
-			// qua ngay hom sau se huy hoa don thue
-			if (ngayThue.isBefore(LocalDate.now())) {
-				dsTP.deleteCTHDTheoMa(maHoaDon);
-				dsDP.huyDatPhong(maHoaDon);
-				dsTP.setTTPhongTheoMa(hd.getPhong().getMaPhong(), "EMPT");
-				upTable2();
-			}
-		}
-	}
+//	public void huyThuePhongQuaNgay() {
+//		for (HoaDonPhong hd : dsHD.getDSHDThue()) {
+//			String maHoaDon = hd.getMaHoaDon().trim();
+//			String ngay = hd.getNgayLapHoaDon().toString();
+//			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+//			LocalDate ngayThue = LocalDate.parse(ngay);
+//			// qua ngay hom sau se huy hoa don thue
+//			if (ngayThue.isBefore(LocalDate.now())) {
+//				dsTP.deleteCTHDTheoMa(maHoaDon);
+//				dsDP.huyDatPhong(maHoaDon);
+//				dsTP.setTTPhongTheoMa(hd.getPhong().getMaPhong(), "EMPT");
+//				upTable2();
+//			}
+//		}
+//	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		Object o = e.getSource();
 		if (o == lbIconSearch) {
-			ktraKH();
+		//	ktraKH();
 		}
 		if (o == tableDSPhong) {
-			clearTable3();
-			clickTable1();
-			upTable3();
+		//	clearTable3();
+	//		clickTable1();
+	//		upTable3();
 		}
 		if (o == tableDSPhong2) {
-			clickTable2();
-			upTable3();
+		//	clickTable2();
+		//	upTable3();
 		}
 
 	}
@@ -969,5 +1019,8 @@ public class Frm_ThuePhong extends JFrame implements MouseListener, ActionListen
 		if (o == lbIconSearch) {
 			lbIconSearch.setBorder(new LineBorder(new Color(0, 0, 0), 0));
 		}
+	}
+	public static void main(String[] args) throws IOException, ClassNotFoundException {
+		new Frm_ThuePhong().setVisible(true);
 	}
 }

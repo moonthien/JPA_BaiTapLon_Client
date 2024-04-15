@@ -370,21 +370,9 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 		df = new DecimalFormat("###,### VNĐ");
 		Object[] obj = new Object[6];
 		if (ktraDuLieu()) {
-//			Dao_PhatSinhMa matp1 = new Dao_PhatSinhMa();
-//			int mada = matp1.getMaDATuDong();
-//			String manu = matp1.getMaNUTuDong();
 			String loai = (String) comboLDV.getSelectedItem();
 			String tendv = (String) comboTDV.getSelectedItem();
 			LoaiDichVu ldv = dsClientDV.getDSLKH().get(comboLDV.getSelectedIndex());
-//			int ma;
-//			if (loai.equals("Thực phẩm")) {
-//				ma = mada;
-//				ldv = new LoaiDichVu("FOOD", "Thực phẩm");
-//
-//			} else {
-//				ldv = new LoaiDichVu("WATER", "Nước uống");
-//				ma = manu;
-//			}
 			int slt = Integer.parseInt(txtSoLuongTon.getText());
 			double giaban = Double.parseDouble(txtDonGia.getText());
 
@@ -421,11 +409,6 @@ public class Frm_QuanLyDichVu extends JFrame implements ActionListener, MouseLis
 				String loai = (String) comboLDV.getSelectedItem();
 				String tendv = (String) comboTDV.getSelectedItem();
 				LoaiDichVu ldv = dsClientDV.getDSLKH().get(comboLDV.getSelectedIndex());
-//				if (loai.equals("Thực phẩm")) {
-//					ldv = new LoaiDichVu("FOOD", "Thực phẩm");
-//				} else {
-//					ldv = new LoaiDichVu("WATER", "Nước uống");
-//				}
 				int slt = Integer.parseInt(txtSoLuongTon.getText());
 				double giaban = Double.parseDouble(txtDonGia.getText());
 				obj[0] = ma;

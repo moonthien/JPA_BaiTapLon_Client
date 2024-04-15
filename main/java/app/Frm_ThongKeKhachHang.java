@@ -19,6 +19,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.awt.Color;
 import java.awt.Dimension;
 
@@ -28,12 +29,15 @@ import javax.swing.border.TitledBorder;
 import com.mindfusion.scheduling.Cursor;
 import com.toedter.calendar.JDateChooser;
 
-import connectDB.ConnectDB;
+import client.Client_HoaDonDao;
+import client.Client_KhachHangDao;
+//import connectDB.ConnectDB;
 import entitys.KhachHang;
+import entitys.LoaiKhachHang;
 import jiconfont.icons.FontAwesome;
-import dao.DanhSachKhachHang;
-import dao.Dao_PhatSinhMa;
-import dao.DanhSachHoaDon;
+//import dao.DanhSachKhachHang;
+//import dao.Dao_PhatSinhMa;
+//import dao.DanhSachHoaDon;
 import jiconfont.swing.IconFontSwing;
 
 import javax.swing.border.LineBorder;
@@ -47,6 +51,7 @@ import java.awt.ScrollPane;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 
 public class Frm_ThongKeKhachHang extends JFrame implements ActionListener, MouseListener {
@@ -70,8 +75,10 @@ public class Frm_ThongKeKhachHang extends JFrame implements ActionListener, Mous
 	private JLabel lbltkkh, lbltgtk, lblnbd, lblnkt, lbliconthongke1, lbliconthongke2, lblbackground;
 	private JTableHeader tbHeader;
 	private JButton btnThongKe, btnLamMoi;
-	DanhSachKhachHang dsKh;
-	DanhSachHoaDon dsHD;
+	Client_KhachHangDao dsKh;
+	Client_HoaDonDao dsHD;
+//	DanhSachKhachHang dsKh;
+//	DanhSachHoaDon dsHD;
 
 	/**
 	 * trả về frame Thống kê Khách hàng
@@ -80,7 +87,7 @@ public class Frm_ThongKeKhachHang extends JFrame implements ActionListener, Mous
 		return this.panel_tong;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		new Frm_ThongKeKhachHang().setVisible(true);
 
 	}
@@ -88,9 +95,11 @@ public class Frm_ThongKeKhachHang extends JFrame implements ActionListener, Mous
 	/**
 	 * Tạo frame Thống kê Khách hàng
 	 * 
+	 * @throws IOException
+	 * 
 	 * @throws SQLException
 	 */
-	public Frm_ThongKeKhachHang() {
+	public Frm_ThongKeKhachHang() throws IOException {
 		setTitle("THỐNG KÊ KHÁCH HÀNG");
 		setSize(1400, 670);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -103,9 +112,11 @@ public class Frm_ThongKeKhachHang extends JFrame implements ActionListener, Mous
 	/**
 	 * Tạo gui TKKH
 	 * 
+	 * @throws IOException
+	 * 
 	 * @throws SQLException
 	 */
-	private void gui() {
+	private void gui() throws IOException {
 		getContentPane().setLayout(null);
 		panel_tong = new Panel();
 		panel_tong.setBounds(0, 0, 1400, 670);
@@ -229,7 +240,7 @@ public class Frm_ThongKeKhachHang extends JFrame implements ActionListener, Mous
 
 		panel_thongke2 = new JPanel();
 		panel_thongke2.setBorder(new LineBorder(new Color(0, 0, 0), 5));
-		panel_thongke2.setBackground(new Color(222,155,0));
+		panel_thongke2.setBackground(new Color(222, 155, 0));
 		panel_thongke2.setBounds(928, 112, 448, 228);
 		panel_tong.add(panel_thongke2);
 		panel_thongke2.setLayout(null);
@@ -284,40 +295,49 @@ public class Frm_ThongKeKhachHang extends JFrame implements ActionListener, Mous
 		btnThongKe.addActionListener(this);
 		btnLamMoi.addActionListener(this);
 		table.addMouseListener(this);
-		// kết nối data
-		ConnectDB.getInstance().connect();
-		// Danh sach Khach Hang
-		dsKh = new DanhSachKhachHang();
-		dsHD = new DanhSachHoaDon();
+
+	
+		dsKh = new Client_KhachHangDao();
+		dsHD = new Client_HoaDonDao();
 	}
 
 	/**
 	 * Đưa dữ liệu từ danh sách lên bảng
+	 * 
+	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
-	public void upTable(ArrayList<KhachHang> list) {
+	public void upTable(ArrayList<KhachHang> list) throws ClassNotFoundException, IOException {
+		List<LoaiKhachHang> listLoaiKH = dsKh.getDSLKH();
 		int i = 0;
 		for (KhachHang kh : list) {
 			Object[] obj = new Object[7];
-			obj[0] = kh.getMaKhachHang().trim();
+			obj[0] = kh.getMaKhachHang();
 			obj[1] = kh.getHoTenKhachHang().trim();
-			obj[2] = kh.getLoaiKhachHang().getTenLoaiKhachHang();
+			obj[2] = listLoaiKH.get(kh.getLoaiKhachHang().getMaLoaiKhachHang() - 1).getTenLoaiKhachHang().trim();
 			obj[4] = kh.getSoDienThoai().trim();
 			obj[5] = kh.getSoCCCD().trim();
 			String gt;
-			if (kh.getGioiTinh())
-				gt = "Nữ";
-			else
+			if (kh.isGioiTinh())
 				gt = "Nam";
+			else
+				gt = "Nữ";
+			System.out.println("6");
 			obj[3] = gt;
+			System.out.println("7");
 			obj[6] = kh.getDiemTichLuy();
-			if (table.getRowCount() == 0)
+
+			if (table.getRowCount() == 0) {
+				System.out.println("710");
 				model.addRow(obj);
-			else {
+			} else {
 				for (i = 0; i < table.getRowCount(); i++) {
 					if (obj[0].toString().equals(table.getValueAt(i, 0)))
+						System.out.println("8");
 						break;
 				}
 				if (i == table.getRowCount())
+					System.out.println("9");
 					model.addRow(obj);
 			}
 		}
@@ -326,20 +346,27 @@ public class Frm_ThongKeKhachHang extends JFrame implements ActionListener, Mous
 
 	/**
 	 * Thống kê số khách hàng theo ngày
+	 * 
+	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
-	public void loadThongKeKhachHang() {
+	public void loadThongKeKhachHang() throws ClassNotFoundException, IOException {
+
+		// get ngay bat dau va ngay ket thuc kiểu localdate
 
 		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
 		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
-		@SuppressWarnings("deprecation")
-		Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
-		@SuppressWarnings("deprecation")
-		Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
-		if (ngayBatDau.before(ngayKetThuc) || ngayBatDau.equals(ngayKetThuc)) {
+		LocalDate ngayBatDau = utilngayBD.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		LocalDate ngayKetThuc = utilngayKT.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		
+        // kiểm tra ngày bắt đầu và ngày kết thúc
+
+		if (ngayBatDau.isBefore(ngayKetThuc) || ngayBatDau.equals(ngayKetThuc)) {
 			ArrayList<KhachHang> listHD = dsHD.getDSKhachHangTheoNgay(ngayBatDau, ngayKetThuc);
-			int tong = dsHD.tongSoKHTheoNgay(ngayBatDau, ngayKetThuc);
+			long tong = dsHD.tongSoKHTheoNgay(ngayBatDau, ngayKetThuc);
 			lblthongke1.setText("Tổng số khách hàng:");
 			lbltongtk1.setText(String.valueOf(tong));
+			System.out.println("listKH: " + listHD);
 			upTable(listHD);
 		} else
 			JOptionPane.showMessageDialog(this, "Ngày bắt đầu phải trước hoặc bằng ngày kết thúc!");
@@ -349,27 +376,34 @@ public class Frm_ThongKeKhachHang extends JFrame implements ActionListener, Mous
 	 * 
 	 * @param ma là mã khách hàng
 	 * @return tổng số hóa đơn theo mã khách hàng trong ngày được chọn thống kê
+	 * @throws IOException 
 	 */
-	public float soTienTheoMaTheoNgay(String ma) {
+	public float soTienTheoMaTheoNgay(int ma) throws IOException {
 		float tong = 0;
+//		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
+//		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
+//	//	DanhSachKhachHang dao = new DanhSachKhachHang();
+//		@SuppressWarnings("deprecation")
+//		Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
+//		@SuppressWarnings("deprecation")
+//		Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
 		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
 		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
-		DanhSachKhachHang dao = new DanhSachKhachHang();
-		@SuppressWarnings("deprecation")
-		Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
-		@SuppressWarnings("deprecation")
-		Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
-		tong = dsHD.tongTienKHTheoNgay(ma, ngayBatDau, ngayKetThuc);
+		LocalDate ngayBatDau = utilngayBD.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		LocalDate ngayKetThuc = utilngayKT.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		tong = (float) dsHD.tinhTongTienTheoMaKHTheoNgay(ma, ngayBatDau, ngayKetThuc);
+		System.out.println("tong tien: " + tong);
 		return tong;
 	}
 
 	/**
 	 * sự kiện click cột trong table hiện lên thống kê tổng số hóa đơn của khách
 	 * hàng
+	 * @throws IOException 
 	 */
-	public void setTextTB() {
+	public void setTextTB() throws IOException {
 		int row = table.getSelectedRow();
-		String ma = (String) table.getValueAt(row, 0);
+		int ma = (int) table.getValueAt(row, 0);
 		float tong = soTienTheoMaTheoNgay(ma);
 		lblthongke2.setText("Tổng số tiền của khách hàng:");
 		lbltongtk2.setText(df.format(tong));
@@ -426,7 +460,12 @@ public class Frm_ThongKeKhachHang extends JFrame implements ActionListener, Mous
 	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		setTextTB();
+		 try {
+			setTextTB();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 
 	@Override
@@ -464,7 +503,12 @@ public class Frm_ThongKeKhachHang extends JFrame implements ActionListener, Mous
 			clearTable();
 			clearTK2();
 			loadThongKeSoGio();
-			loadThongKeKhachHang();
+			try {
+				loadThongKeKhachHang();
+			} catch (ClassNotFoundException | IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} else if (o == btnLamMoi) {
 			resetAll();
 		}

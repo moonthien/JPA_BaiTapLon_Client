@@ -8,11 +8,13 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,6 +23,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -44,12 +48,13 @@ import org.openxmlformats.schemas.officeDocument.x2006.docPropsVTypes.ArrayDocum
 
 import com.toedter.calendar.JDateChooser;
 
-import connectDB.ConnectDB;
-import dao.DanhSachChucVu;
-import dao.DanhSachKhachHang;
-import dao.DanhSachNhanVien;
-import dao.DanhSachTaiKhoan;
-import dao.Dao_PhatSinhMa;
+import client.Client_NhanVienDao;
+//import connectDB.ConnectDB;
+//import dao.DanhSachChucVu;
+//import dao.DanhSachKhachHang;
+//import dao.DanhSachNhanVien;
+//import dao.DanhSachTaiKhoan;
+//import dao.Dao_PhatSinhMa;
 import entitys.ChucVu;
 import entitys.KhachHang;
 import entitys.LoaiKhachHang;
@@ -84,11 +89,12 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 	String selectedDate;
 	JPanel pnDSP, panel;
 	private JLabel lbIconSearch;
-	DanhSachTaiKhoan dstk;
+//	DanhSachTaiKhoan dstk;
 	KeyStroke keyStrokeCTRL1, keyStrokeCTRL2, keyStrokeCTRL3;
-	DanhSachNhanVien dsNV;
+	private Client_NhanVienDao dsClientNV;
+//	DanhSachNhanVien dsNV;
 //	DanhSachTaiKhoan dsTK;
-	public Frm_NhanVien() {
+	public Frm_NhanVien() throws IOException, ClassNotFoundException {
 		setTitle("QUẢN LÝ NHÂN VIÊN");
 		setSize(1400, 700);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -101,8 +107,8 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 		return this.pnQLNV;
 	}
 
-	public void gui() {
-		dstk = new DanhSachTaiKhoan();
+	public void gui() throws IOException, ClassNotFoundException {
+//		dstk = new DanhSachTaiKhoan();
 		getContentPane().setLayout(null);
 		pnQLNV = new Panel();
 		pnQLNV.setBounds(0, 0, 1400, 700);
@@ -315,10 +321,11 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 		btnThem.addActionListener(this);
 		lbIconSearch.addMouseListener(this);
 
+		dsClientNV = new Client_NhanVienDao();
 		table.addMouseListener(this);
 
-		ConnectDB.getInstance().connect();
-		dsNV = new DanhSachNhanVien();
+//		ConnectDB.getInstance().connect();
+//		dsNV = new DanhSachNhanVien();
 		upTable();
 
 		// add và định nghĩa các hot key cho ứng dụng
@@ -347,13 +354,14 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 		table.clearSelection();
 	}
 
-	public void upTable() {
-		ArrayList<NhanVien> listE = dsNV.getAllDanhSachNV();
-		for (NhanVien nv : listE) {
+	public void upTable() throws ClassNotFoundException, IOException {
+		List<NhanVien> list = dsClientNV.getDSNhanVien();
+		List<ChucVu> listCV = dsClientNV.getAllRole();
+		for (NhanVien nv : list) {
 			Object[] obj = new Object[9];
-			obj[0] = nv.getMaNhanVien().trim();
+			obj[0] = nv.getMaNhanVien();
 			obj[1] = nv.getHoTenNhanVien().trim();
-			obj[2] = nv.getchucVu().getTenChucVu();
+			obj[2] = listCV.get(nv.getChucVu().getMaChucVu()-1).getTenChucVu();
 			obj[3] = nv.isGioiTinh() ? "Nam" : "Nữ";
 			obj[4] = nv.getNgaySinh().toString();
 			obj[5] = nv.getDiaChi().trim();
@@ -369,7 +377,7 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 		int row = table.getSelectedRow();
 		txtHoTen.setText(table.getValueAt(row, 1).toString());
 
-		if (table.getValueAt(row, 2).toString().equalsIgnoreCase("Quản Lí"))
+		if (table.getValueAt(row, 2).toString().equalsIgnoreCase("Qu?n lý"))
 			comboChucVu.setSelectedIndex(0);
 		else
 			comboChucVu.setSelectedIndex(1);
@@ -432,7 +440,7 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 		});
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		new Frm_NhanVien().setVisible(true);
 	}
 
@@ -440,7 +448,15 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 	public void mouseClicked(MouseEvent e) {
 		Object o = e.getSource();
 		if (o == lbIconSearch) {
-			ktraNV();
+			try {
+				ktraNV();
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} else {
 			setTextTB();
 		}
@@ -484,14 +500,33 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 				btnThem.setText("Xác nhận");
 				btnSua.setText("Hủy");
 			} else if (btnThem.getText().equalsIgnoreCase("Xác nhận")) {
-				if (themNV()) {
-					btnSua.setText("Sửa (Ctrl 2)");
-					btnThem.setText("Thêm (Ctrl 1)");
+				try {
+					if (themNV()) {
+						btnSua.setText("Sửa (Ctrl 2)");
+						btnThem.setText("Thêm (Ctrl 1)");
+					}
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 			} else if (btnThem.getText().equals("Xác nhận ")) {
-				if (suaNV()) {
-					btnThem.setText("Thêm (Ctrl 1)");
-					btnSua.setText("Sửa (Ctrl 2)");
+				try {
+					if (suaNV()) {
+						btnThem.setText("Thêm (Ctrl 1)");
+						btnSua.setText("Sửa (Ctrl 2)");
+					}
+				} catch (HeadlessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 			}
 		} else if (o.equals(btnSua)) {
@@ -503,19 +538,16 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 				btnSua.setText("Hủy");
 			}
 		} else if (o.equals(btnLamMoi)) {
-			clearTable();
-			upTable();
+			
 			xoaTrang();
 		}
 
 	}
 
 	// them nhan vien
-	public boolean themNV() {
+	public boolean themNV() throws ClassNotFoundException, IOException {
 		Object[] obj = new Object[9];
 		if (ktraDuLieu()) {
-			Dao_PhatSinhMa makh = new Dao_PhatSinhMa();
-			String ma = makh.getMaNVCuoi();
 			String ten = txtHoTen.getText();
 			String sdt = txtSDT.getText();
 			String dc = txtDiaChi.getText();
@@ -537,17 +569,19 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 			Date ngaySinhh = new Date(date.getYear(), date.getMonth(), date.getDate());
 
 			String tenChucVu = String.valueOf(comboChucVu.getSelectedItem());
-			String maChucVu = null;
-			if (tenChucVu.equalsIgnoreCase("Quản lý")) {
-				maChucVu = "QL";
+			int maChucVu ;
+			if (tenChucVu.equalsIgnoreCase("Qu?n lý")) {
+				maChucVu = 2;
 			} else
-				maChucVu = "NV";
+				maChucVu = 1;
 			LocalDate ngaysinh = ngaySinhh.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-			ChucVu cv = new ChucVu(maChucVu);
-			NhanVien nv = new NhanVien(ma, ten, cccd, dc, sdt, gioitinh, cv, ngaysinh, trangThai);
-			if (!dsNV.themNhanVien(nv)) {
+			ChucVu cv = new ChucVu(maChucVu, tenChucVu);
+			NhanVien nv = new NhanVien( ten, cccd, dc, sdt, gioitinh, cv, ngaysinh, trangThai);
+			dsClientNV.themNhanVien(nv);
+			List<NhanVien> list = dsClientNV.getDSNhanVien();
+			NhanVien nv1 = list.get(list.size()-1);
 				JOptionPane.showMessageDialog(this, "Thêm thành công");
-				obj[0] = ma;
+				obj[0] = nv1.getMaNhanVien();
 				obj[1] = ten;
 				obj[2] = cv.getTenChucVu();
 				obj[3] = gt;
@@ -560,14 +594,14 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 				xoaTrang();
 
 				// tạo tk
-				dstk.createAccount(ma, ma.toLowerCase());
-				return true;
-			}
+//				dstk.createAccount(ma, ma.toLowerCase());
+//				return true;
+			//}
 		}
 		return false;
 	}
 
-	public boolean suaNV() {
+	public boolean suaNV() throws HeadlessException, ClassNotFoundException, IOException {
 		int row = table.getSelectedRow();
 		if (row == -1) {
 			JOptionPane.showMessageDialog(this, "Chọn nhân viên cần sửa");
@@ -575,7 +609,7 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 			Object[] obj = new Object[9];
 			if (ktraDuLieuSua()) {
 
-				String ma = table.getValueAt(row, 0).toString();
+				int ma = (int) table.getValueAt(row, 0);
 				String ten = txtHoTen.getText();
 				String sdt = txtSDT.getText();
 				String dc = txtDiaChi.getText();
@@ -597,13 +631,13 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 				Date ngaySinhh = new Date(date.getYear(), date.getMonth(), date.getDate());
 
 				String tenChucVu = String.valueOf(comboChucVu.getSelectedItem());
-				String maChucVu = null;
+				int maChucVu ;
 				if (tenChucVu.equalsIgnoreCase("Quản lý")) {
-					maChucVu = "QL";
+					maChucVu = 2;
 				} else
-					maChucVu = "NV";
+					maChucVu = 1;
 				LocalDate ngaysinh = ngaySinhh.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-				ChucVu cv = new ChucVu(maChucVu);
+				ChucVu cv = dsClientNV.getAllRoleByID(maChucVu);
 				NhanVien nv = new NhanVien(ma, ten, cccd, dc, sdt, gioitinh, cv, ngaysinh, trangThai);
 				obj[0] = ma;
 				obj[1] = ten;
@@ -615,10 +649,10 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 				obj[7] = cccd;
 				obj[8] = tt;
 				
-				if(!trangThai)
-					dstk.deleteAccountById(ma);
+//				if(!trangThai)
+//					dstk.deleteAccountById(ma);
 					
-				if (!dsNV.suaNhanVien(nv)) {
+				if (dsClientNV.updateNhanVien(nv)) {
 					JOptionPane.showMessageDialog(this, "Sửa thành công");
 					table.setValueAt(obj[1], row, 1);
 					table.setValueAt(obj[2], row, 2);
@@ -698,7 +732,7 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 
 		return true;
 	}
-
+//
 	public boolean ktraDuLieuSua() {
 		int row = table.getSelectedRow();
 		Date date = ngaySinh.getDate();
@@ -763,14 +797,21 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 	}
 
 	// Lọc khách hàng theo SĐT
-	public void locNVTheoSDT() {
+	public void locNVTheoSDT() throws ClassNotFoundException, IOException {
 		clearTable();
 		String sdt = txtSDT.getText();
-		NhanVien nv = dsNV.getNhanVienTheoSDT(sdt);
+		int maChucVu;
+		String tenChucVu = String.valueOf(comboChucVu.getSelectedItem());
+		if (tenChucVu.equalsIgnoreCase("Quản lý")) {
+			maChucVu = 2;
+		} else
+			maChucVu = 1;
+		ChucVu cv = dsClientNV.getAllRoleByID(maChucVu);
+		NhanVien nv = dsClientNV.getNhanVienTheoSDT(sdt);
 		Object[] obj = new Object[9];
 		obj[0] = nv.getMaNhanVien();
 		obj[1] = nv.getHoTenNhanVien();
-		obj[2] = nv.getchucVu().getTenChucVu();
+		obj[2] = cv.getTenChucVu();
 		String gioitinh;
 		if (nv.isGioiTinh()) {
 			gioitinh = "Nam";
@@ -791,10 +832,10 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 		model.addRow(obj);
 
 	}
-
-	public void ktraNV() {
+//
+	public void ktraNV() throws ClassNotFoundException, IOException {
 		String sdt = txtSDT.getText();
-		NhanVien nv = dsNV.getNhanVienTheoSDT(sdt);
+		NhanVien nv = dsClientNV.getNhanVienTheoSDT(sdt);
 		if (sdt.equalsIgnoreCase("")) {
 			JOptionPane.showMessageDialog(this, "Số điện thoại không được để trống");
 			txtSDT.requestFocus();
@@ -813,9 +854,9 @@ public class Frm_NhanVien extends JFrame implements MouseListener, ActionListene
 				i = 1;
 			}
 			comboGT.setSelectedIndex(i);
-			String cv = nv.getchucVu().getTenChucVu();
+			String cv = nv.getChucVu().getTenChucVu();
 			int j;
-			if (cv.equalsIgnoreCase("Quản Lý")) {
+			if (cv.equalsIgnoreCase("Qu?n Lý")) {
 				j = 0;
 			} else {
 				j = 1;

@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.awt.Color;
 import java.awt.Dimension;
 
@@ -28,11 +29,15 @@ import javax.swing.border.TitledBorder;
 import com.mindfusion.scheduling.Cursor;
 import com.toedter.calendar.JDateChooser;
 
-import connectDB.ConnectDB;
-import dao.DanhSachHoaDon;
-import dao.DanhSachKhachHang;
-import dao.DanhSachNhanVien;
-import dao.DanhSachPhong;
+import client.Client_HoaDonDao;
+import client.Client_KhachHangDao;
+import client.Client_NhanVienDao;
+import client.Client_PhongDao;
+//import connectDB.ConnectDB;
+//import dao.DanhSachHoaDon;
+//import dao.DanhSachKhachHang;
+//import dao.DanhSachNhanVien;
+//import dao.DanhSachPhong;
 import entitys.HoaDonPhong;
 import entitys.KhachHang;
 import entitys.NhanVien;
@@ -51,6 +56,7 @@ import java.awt.ScrollPane;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 import javax.swing.border.EtchedBorder;
 
@@ -77,24 +83,28 @@ public class Frm_ThongKeHoaDon extends JFrame implements ActionListener, MouseLi
 	private JButton btnThongKe, btnLamMoi;
 	private DateTimeFormatter dt;
 	private FixButton btnInHD;
-	DanhSachHoaDon dsHD;
+	Client_HoaDonDao dsHD;
 	Frm_ThanhToan frmTT;
 	HoaDonPhong hd;
-	DanhSachPhong p;
+	Client_PhongDao dsPhong;
+	Client_NhanVienDao dsNV;
+	Client_KhachHangDao dsKH;
+	
 
 	public Panel getFrmThongKeHoaDon() {
-		return this.panel_tong;
+		return this.panel_tong;	
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		new Frm_ThongKeHoaDon().setVisible(true);
 
 	}
 
 	/**
 	 * Create the application.
+	 * @throws IOException 
 	 */
-	public Frm_ThongKeHoaDon() {
+	public Frm_ThongKeHoaDon() throws IOException {
 		setTitle("THỐNG KÊ HÓA ĐƠN");
 		setSize(1400, 670);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -106,8 +116,9 @@ public class Frm_ThongKeHoaDon extends JFrame implements ActionListener, MouseLi
 
 	/**
 	 * Initialize the contents of the frame.
+	 * @throws IOException 
 	 */
-	private void gui() {
+	private void gui() throws IOException {
 		getContentPane().setLayout(null);
 		panel_tong = new Panel();
 		panel_tong.setBounds(0, 0, 1400, 670);
@@ -298,25 +309,34 @@ public class Frm_ThongKeHoaDon extends JFrame implements ActionListener, MouseLi
 		btnInHD.addActionListener(this);
 		table.addMouseListener(this);
 		// kết nối data
-		ConnectDB.getInstance().connect();
+//		ConnectDB.getInstance().connect();
 		// Danh sach Khach Hang
-		dsHD = new DanhSachHoaDon();
+		dsHD = new Client_HoaDonDao();
+		dsPhong = new Client_PhongDao();
+		dsNV = new Client_NhanVienDao();
+		dsKH = new Client_KhachHangDao();
+		
 	}
 
 	/**
 	 * Đưa dữ liệu từ danh sách lên bảng
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 */
-	public void upTable(ArrayList<HoaDonPhong> list) {
+	public void upTable(ArrayList<HoaDonPhong> list) throws ClassNotFoundException, IOException {
 		int i = 0;
 		for (HoaDonPhong hd : list) {
 			Object[] obj = new Object[8];
-			obj[0] = hd.getMaHoaDon().trim();
+			obj[0] = hd.getMaHoaDon();
 			obj[1] = hd.getNgayLapHoaDon();
 			obj[2] = hd.getGioBatDauThue().format(dt);
 			obj[3] = hd.getGioTraPhong().format(dt);
-			obj[4] = hd.getMaKhachHang().getHoTenKhachHang();
-			obj[5] = hd.getMaNhanVien().getHoTenNhanVien();
-			obj[6] = hd.getPhong().getMaPhong();
+			KhachHang kh = dsKH.getKhachHangTheoMa(hd.getMaKhachHang().getMaKhachHang());
+			obj[4] = kh.getHoTenKhachHang().trim();
+			NhanVien nv = dsNV.getNhanVienTheoMa(hd.getMaNhanVien().getMaNhanVien()); 
+			obj[5] = nv.getHoTenNhanVien();
+			Phong p = dsPhong.getPhongTheoMa(hd.getPhong().getMaPhong());
+			obj[6] = p.getMaPhong();
 			obj[7] = df.format(hd.getThanhTien());
 			if (table.getRowCount() == 0)
 				model.addRow(obj);
@@ -334,21 +354,22 @@ public class Frm_ThongKeHoaDon extends JFrame implements ActionListener, MouseLi
 
 	/**
 	 * Thống kê số hóa đơn theo ngày
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 */
-	public void loadThongKeHoaDon() {
-
+	public void loadThongKeHoaDon() throws ClassNotFoundException, IOException {
+		
 		java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
 		java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
-		@SuppressWarnings("deprecation")
-		Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
-		@SuppressWarnings("deprecation")
-		Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
-		if (ngayBatDau.before(ngayKetThuc) || ngayBatDau.equals(ngayKetThuc)) {
+		LocalDate ngayBatDau = utilngayBD.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		LocalDate ngayKetThuc = utilngayKT.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		
+		if (ngayBatDau.isBefore(ngayKetThuc) || ngayBatDau.equals(ngayKetThuc)) {
 			ArrayList<HoaDonPhong> listHD = dsHD.getDSHDTheoNgay(ngayBatDau, ngayKetThuc);
 			int tong = listHD.size();
 			lblthongke1.setText("Tổng số hóa đơn:");
 			lbltongtk1.setText(String.valueOf(tong));
-			float tongtien = dsHD.tongTienHDTheoNgay(ngayBatDau, ngayKetThuc);
+			float tongtien = (float) dsHD.tinhTongTienHDTheoNgay(ngayBatDau, ngayKetThuc);
 			lblthongke2.setText("Tổng tiền các hóa đơn:");
 			lbltongtk2.setText(df.format(tongtien));
 			upTable(listHD);
@@ -409,12 +430,16 @@ public class Frm_ThongKeHoaDon extends JFrame implements ActionListener, MouseLi
 			JOptionPane.showMessageDialog(this, "Không có hóa đơn nào để xuất !");
 		} else {
 			String maHDIN = table.getValueAt(i, 0).toString();
+//			java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
+//			java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
+//			@SuppressWarnings("deprecation")
+//			Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
+//			@SuppressWarnings("deprecation")
+//			Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
 			java.util.Date utilngayBD = dateChooserThongKeNgayBatDau.getDate();
 			java.util.Date utilngayKT = dateChooserThongKeNgayKetThuc.getDate();
-			@SuppressWarnings("deprecation")
-			Date ngayBatDau = new Date(utilngayBD.getYear(), utilngayBD.getMonth(), utilngayBD.getDate());
-			@SuppressWarnings("deprecation")
-			Date ngayKetThuc = new Date(utilngayKT.getYear(), utilngayKT.getMonth(), utilngayKT.getDate());
+			LocalDate ngayBatDau = utilngayBD.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+			LocalDate ngayKetThuc = utilngayKT.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
 			ArrayList<HoaDonPhong> listHD = dsHD.getDSHDTheoNgay(ngayBatDau, ngayKetThuc);
 			for (HoaDonPhong hd : listHD) {
 				for (i = 0; i < table.getRowCount(); i++) {
@@ -470,7 +495,15 @@ public class Frm_ThongKeHoaDon extends JFrame implements ActionListener, MouseLi
 			clearTable();
 			clearTK2();
 			loadThongKeSoGio();
-			loadThongKeHoaDon();
+			try {
+				loadThongKeHoaDon();
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} else if (o == btnLamMoi) {
 			resetAll();
 		} else if (o == btnInHD) {

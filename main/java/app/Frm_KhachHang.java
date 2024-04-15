@@ -275,19 +275,17 @@ public class Frm_KhachHang extends JFrame implements ActionListener, MouseListen
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-//		ConnectDB.getInstance().connect();
-//
-//		dsKh = new DanhSachKhachHang();
 
-//		// add và định nghĩa các hot key cho ứng dụng
-//		keyStrokeCTRL1 = KeyStroke.getKeyStroke("ctrl 1");
-//		keyStrokeCTRL2 = KeyStroke.getKeyStroke("ctrl 2");
-//		keyStrokeCTRL3 = KeyStroke.getKeyStroke("ctrl 3");
-//
-//		// Phím nóng
-//		addHotKey1();
-//		addHotKey2();
-//		addHotKey3();
+
+		// add và định nghĩa các hot key cho ứng dụng
+		keyStrokeCTRL1 = KeyStroke.getKeyStroke("ctrl 1");
+		keyStrokeCTRL2 = KeyStroke.getKeyStroke("ctrl 2");
+		keyStrokeCTRL3 = KeyStroke.getKeyStroke("ctrl 3");
+
+		// Phím nóng
+		addHotKey1();
+		addHotKey2();
+		addHotKey3();
 
 	}
 
@@ -346,15 +344,17 @@ public class Frm_KhachHang extends JFrame implements ActionListener, MouseListen
 				btnSua.setText("Hủy");
 			}
 		} else if (o.equals(btnLamMoi)) {
-			 clearTable();
+		//	clearTable();
 			xoaTrang();
-//		
-				try {
-					upTable();
-				} catch (ClassNotFoundException | IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+			try {
+				upTable();
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 	}
 
@@ -404,15 +404,13 @@ public class Frm_KhachHang extends JFrame implements ActionListener, MouseListen
 			} else
 				gioitinh = false;
 //			LoaiKhachHang lkh = new LoaiKhachHang("NOR", "Khách hàng thường");
-			LoaiKhachHang loaiKhachHang = dsClientKH.getLoaiKhachHang(1);
+			LoaiKhachHang loaiKhachHang = dsClientKH.getLoaiKhachHang(2);
 
 			KhachHang kh = new KhachHang(ten, cccd, dt, 1, gioitinh, loaiKhachHang);
 			dsClientKH.themKhachHang(kh);
 
 			List<KhachHang> list = dsClientKH.getDSKH();
 			KhachHang kh1 = list.get(list.size()-1);
-			System.out.println(list.size());
-//			if (!dsClientKH.themKhachHang(kh)) {
 			JOptionPane.showMessageDialog(this, "Thêm thành công");
 			obj[0] = kh1.getMaKhachHang();
 			obj[1] = kh.getHoTenKhachHang();
@@ -491,35 +489,37 @@ public class Frm_KhachHang extends JFrame implements ActionListener, MouseListen
 		lbTB.setText(message);
 	}
 
-//	public void ktraKH() {
-//		String sdt = txtSDT.getText();
-//		KhachHang kh = dsKh.getKhachHangTheoSDT(sdt);
-//		if (sdt.equals("")) {
-//			JOptionPane.showMessageDialog(this, "Số điện thoại không được để trống");
-//			txtSDT.requestFocus();
-//		} else if (!sdt.matches("^(0[0-9]{9})$")) {
-//			JOptionPane.showMessageDialog(this, "Số điện thoại không quá 10 số và bắt đầu bằng số 0");
-//			txtSDT.requestFocus();
-//		} else if (kh != null) {
-//			txtTenKH.setText(kh.getHoTenKhachHang());
-//			txtCCCD.setText(kh.getSoCCCD());
-//			txtLoaiKH.setText(kh.getLoaiKhachHang().getTenLoaiKhachHang());
-//			txtDTL.setText(Integer.toString(kh.getDiemTichLuy()));
-//			Boolean gt = kh.getGioiTinh();
-//			int i = 2;
-//			if (gt == true) {
-//				i = 0;
-//			} else {
-//				i = 1;
-//			}
-//			comboGT.setSelectedIndex(i);
-//			locKHTheoSDT();
-//		} else {
-//			JOptionPane.showMessageDialog(this, "Khách hàng chưa có trong hệ thống \n Thêm khách hàng mới!!!");
-//			txtTenKH.requestFocus();
-//		}
-//
-//	}
+	public void ktraKH() throws ClassNotFoundException, IOException {
+		String sdt = txtSDT.getText();
+		KhachHang kh = dsClientKH.getKhachHangTheoSDT(sdt);
+		if (sdt.equals("")) {
+			
+			JOptionPane.showMessageDialog(this, "Số điện thoại không được để trống");
+			txtSDT.requestFocus();
+		} else if (!sdt.matches("^(0[0-9]{9})$")) {
+			JOptionPane.showMessageDialog(this, "Số điện thoại không quá 10 số và bắt đầu bằng số 0");
+			txtSDT.requestFocus();
+		} else if (kh != null) {
+			LoaiKhachHang loaiKhachHang = dsClientKH.getLoaiKhachHang(kh.getLoaiKhachHang().getMaLoaiKhachHang());
+			txtTenKH.setText(kh.getHoTenKhachHang());
+			txtCCCD.setText(kh.getSoCCCD());
+			txtLoaiKH.setText(loaiKhachHang.getTenLoaiKhachHang());
+			txtDTL.setText(Integer.toString(kh.getDiemTichLuy()));
+			Boolean gt = kh.isGioiTinh();
+			int i = 2;
+			if (gt == true) {
+				i = 0;
+			} else {
+				i = 1;
+			}
+			comboGT.setSelectedIndex(i);
+			locKHTheoSDT();
+		} else {
+			JOptionPane.showMessageDialog(this, "Khách hàng chưa có trong hệ thống \n Thêm khách hàng mới!!!");
+			txtTenKH.requestFocus();
+		}
+
+	}
 
 	public void clearTable() {
 		while (table.getRowCount() > 0) {
@@ -528,60 +528,56 @@ public class Frm_KhachHang extends JFrame implements ActionListener, MouseListen
 	}
 
 //	// Lọc khách hàng theo SĐT
-//	public void locKHTheoSDT() {
-//		clearTable();
-//		String sdt = txtSDT.getText();
-//		KhachHang kh = dsKh.getKhachHangTheoSDT(sdt);
-//		Object[] obj = new Object[7];
-//		obj[0] = kh.getMaKhachHang();
-//		obj[1] = kh.getHoTenKhachHang();
-//		obj[2] = kh.getLoaiKhachHang().getTenLoaiKhachHang();
-//		String gioitinh;
-//		if (kh.getGioiTinh()) {
-//			gioitinh = "Nam";
-//		} else
-//			gioitinh = "Nữ";
-//		obj[3] = gioitinh;
-//		obj[4] = sdt;
-//		obj[5] = kh.getSoCCCD();
-//		obj[6] = kh.getDiemTichLuy();
-//		model.addRow(obj);
-//
-//	}
+	public void locKHTheoSDT() throws ClassNotFoundException, IOException {
+		clearTable();
+		String sdt = txtSDT.getText();
+		KhachHang kh = dsClientKH.getKhachHangTheoSDT(sdt);
+		LoaiKhachHang loaiKhachHang = dsClientKH.getLoaiKhachHang(kh.getLoaiKhachHang().getMaLoaiKhachHang());
+		Object[] obj = new Object[7];
+		obj[0] = kh.getMaKhachHang();
+		obj[1] = kh.getHoTenKhachHang();
+		obj[2] = loaiKhachHang.getTenLoaiKhachHang();
+		obj[3] = kh.isGioiTinh() ? "Nam" : "Nữ";
+		obj[4] = kh.getSoDienThoai().trim();
+		obj[5] = kh.getSoCCCD().trim();
+		obj[6] = kh.getDiemTichLuy();
+		model.addRow(obj);
+
+	}
 
 	// hot key Ctrl1
-//	public void addHotKey1() {
-//
-//		btnThem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStrokeCTRL1, "clickButton");
-//		btnThem.getActionMap().put("clickButton", new AbstractAction() {
-//		@Override
-//			public void actionPerformed(ActionEvent e) {
-//				btnThem.doClick();
-//			}
-//		});
-//	}
+	public void addHotKey1() {
+
+		btnThem.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStrokeCTRL1, "clickButton");
+		btnThem.getActionMap().put("clickButton", new AbstractAction() {
+		@Override
+			public void actionPerformed(ActionEvent e) {
+				btnThem.doClick();
+			}
+		});
+	}
 //
 //	// hot key Crtl2
-//	public void addHotKey2() {
-//		btnSua.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStrokeCTRL2, "clickButton");
-//		btnSua.getActionMap().put("clickButton", new AbstractAction() {
-////						        @Override
-//			public void actionPerformed(ActionEvent e) {
-//				btnSua.doClick();
-//			}
-//		});
-//	}
+	public void addHotKey2() {
+		btnSua.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStrokeCTRL2, "clickButton");
+		btnSua.getActionMap().put("clickButton", new AbstractAction() {
+						        @Override
+			public void actionPerformed(ActionEvent e) {
+				btnSua.doClick();
+			}
+		});
+	}
 //
 //	// hot key Crtl3
-//	public void addHotKey3() {
-//		btnLamMoi.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStrokeCTRL3, "clickButton");
-//		btnLamMoi.getActionMap().put("clickButton", new AbstractAction() {
-////						        @Override
-//			public void actionPerformed(ActionEvent e) {
-//				btnLamMoi.doClick();
-//			}
-//		});
-//	}
+	public void addHotKey3() {
+		btnLamMoi.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStrokeCTRL3, "clickButton");
+		btnLamMoi.getActionMap().put("clickButton", new AbstractAction() {
+					        @Override
+			public void actionPerformed(ActionEvent e) {
+				btnLamMoi.doClick();
+			}
+		});
+	}
 
 	// kiểm tra regex
 	public boolean ktraDuLieu() {
@@ -667,7 +663,15 @@ public class Frm_KhachHang extends JFrame implements ActionListener, MouseListen
 	public void mouseClicked(MouseEvent e) {
 		Object o = e.getSource();
 		if (o == lbIconSearch) {
-//			ktraKH();
+			try {
+				ktraKH();
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} else
 			setTextTB();
 

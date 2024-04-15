@@ -5,6 +5,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.HeadlessException;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,6 +13,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.sql.Date;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -37,13 +39,13 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
-import com.toedter.calendar.JDateChooser;
-
-import connectDB.ConnectDB;
-import dao.DanhSachDatPhong;
-import dao.DanhSachKhachHang;
-import dao.DanhSachPhong;
-import dao.Dao_PhatSinhMa;
+//import com.toedter.calendar.JDateChooser;
+//
+//import connectDB.ConnectDB;
+//import dao.DanhSachDatPhong;
+//import dao.DanhSachKhachHang;
+//import dao.DanhSachPhong;
+//import dao.Dao_PhatSinhMa;
 import entitys.KhachHang;
 import entitys.LoaiKhachHang;
 import entitys.LoaiPhong;
@@ -60,6 +62,9 @@ import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+
+import client.Client_PhongDao;
+
 import javax.swing.JFormattedTextField;
 
 //
@@ -80,17 +85,20 @@ public class Frm_QuanLyPhong extends JFrame implements ActionListener, MouseList
 	private DecimalFormat dfs;
 	KeyStroke keyStrokeCTRL1, keyStrokeCTRL2, keyStrokeCTRL3;
 	NhanVien nv;
-	DanhSachPhong dsPhong;
-	DanhSachDatPhong dsDp;
+	Client_PhongDao dsPhong;
+//	DanhSachDatPhong dsDp;
 	String dateString;
 	private Date ngayHienTai;
 
-	public Panel getFrmQuanLyPhong() {
-		return this.pnQLDP;
-	}
-
-	public Frm_QuanLyPhong(NhanVien nv) {
-		this.nv = nv;
+//	public Panel getFrmQuanLyPhong() {
+//		return this.pnQLDP;
+//	}
+public static void main(String[] args) throws IOException, ClassNotFoundException {
+	new Frm_QuanLyPhong().setVisible(true);
+}
+//	public Frm_QuanLyPhong(NhanVien nv) {
+		public Frm_QuanLyPhong() throws IOException, ClassNotFoundException {
+//		this.nv = nv;
 		setTitle("QUẢN LÝ PHÒNG");
 		setSize(1400, 700);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -99,8 +107,8 @@ public class Frm_QuanLyPhong extends JFrame implements ActionListener, MouseList
 		gui();
 	}
 
-	public void gui() {
-		dsDp = new DanhSachDatPhong();
+	public void gui() throws IOException, ClassNotFoundException {
+//		dsDp = new DanhSachDatPhong();
 		getContentPane().setLayout(null);
 
 		pnQLDP = new Panel();
@@ -330,9 +338,9 @@ public class Frm_QuanLyPhong extends JFrame implements ActionListener, MouseList
 		lbBGQLDP.setIcon(new ImageIcon(Frm_QuanLyDatPhong.class.getResource("/imgs/bg_chot1.png")));
 		lbBGQLDP.setBounds(0, 0, 1400, 700);
 		pnQLDP.add(lbBGQLDP);
-		ConnectDB.getInstance().connect();
-		// Danh sach Mat Hang
-		dsPhong = new DanhSachPhong();
+//		ConnectDB.getInstance().connect();
+//		// Danh sach Mat Hang
+		dsPhong = new Client_PhongDao();
 
 		upCombobox();
 		upCombobox2();
@@ -358,10 +366,10 @@ public class Frm_QuanLyPhong extends JFrame implements ActionListener, MouseList
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		dateString = dateFormat.format(ngayHienTai);
 
-		clearTable();
-		ArrayList<Phong> list = dsDp.getAllRoomByDate(dateString);
-		upTable1(list);
-
+//		clearTable();
+//		ArrayList<Phong> list = dsDp.getAllRoomByDate(dateString);
+//		upTable1(list);
+		upTable1();
 		// add và định nghĩa các hot key cho ứng dụng
 		keyStrokeCTRL1 = KeyStroke.getKeyStroke("ctrl 1");
 		keyStrokeCTRL2 = KeyStroke.getKeyStroke("ctrl 2");
@@ -380,20 +388,39 @@ public class Frm_QuanLyPhong extends JFrame implements ActionListener, MouseList
 		Object o = e.getSource();
 		if (o.equals(btnThem)) {
 			if (btnThem.getText().equalsIgnoreCase("Thêm (Ctrl 1)")) {
-				comboTinhTrang.setSelectedIndex(1);
+				comboTinhTrang.setSelectedIndex(0);
 				comboTinhTrang.enable(false);
 				comboTinhTrang.setForeground(Color.black);
 				btnThem.setText("Xác nhận");
 				btnSua.setText("Hủy");
 			} else if (btnThem.getText().equalsIgnoreCase("Xác nhận")) {
-				if (themPhong()) {
-					btnSua.setText("Sửa (Ctrl 2)");
-					btnThem.setText("Thêm (Ctrl 1)");
+				try {
+					if (themPhong()) {
+						btnSua.setText("Sửa (Ctrl 2)");
+						btnThem.setText("Thêm (Ctrl 1)");
+					}
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 			} else if (btnThem.getText().equals("Xác nhận ")) {
-				if (suaPhong()) {
-					btnThem.setText("Thêm (Ctrl 1)");
-					btnSua.setText("Sửa (Ctrl 2)");
+				try {
+					if (suaPhong()) {
+						btnThem.setText("Thêm (Ctrl 1)");
+						btnSua.setText("Sửa (Ctrl 2)");
+					}
+				} catch (HeadlessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 			}
 		} else if (o.equals(btnSua)) {
@@ -404,137 +431,186 @@ public class Frm_QuanLyPhong extends JFrame implements ActionListener, MouseList
 				btnSua.setText("Sửa (Ctrl 2)");
 			} else if (btnSua.getText().equals("Sửa (Ctrl 2)")) {
 				comboTinhTrang.enable(false);
-				comboTinhTrang.setSelectedIndex(1);
+				comboTinhTrang.setSelectedIndex(0);
 				btnThem.setText("Xác nhận ");
 				btnSua.setText("Hủy");
 			}
 		} else if (o.equals(btnLamMoi)) {
-			xoaTrang();
-			clearTable();
-			ArrayList<Phong> list = dsDp.getAllRoomByDate(dateString);
-			upTable1(list);
-		} else if (o.equals(btnPhongVip)) {
-			locTheoLoaiPhongVIP();
-		} else if (o.equals(btnPhongThuong)) {
-			locTheoLoaiPhongThuong();
-		} else if (o.equals(btnTatCa)) {
-			clearTable();
-			ArrayList<Phong> list = dsDp.getAllRoomByDate(dateString);
-			upTable1(list);
-		}
+			try {
+				xoaTrang();
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+//			ArrayList<Phong> list = dsDp.getAllRoomByDate(dateString);
+//			upTable1(list);
+//		} else if (o.equals(btnPhongVip)) {
+//			locTheoLoaiPhongVIP();
+//		} else if (o.equals(btnPhongThuong)) {
+//			locTheoLoaiPhongThuong();
+//		} else if (o.equals(btnTatCa)) {
+////			clearTable();
+////			ArrayList<Phong> list = dsDp.getAllRoomByDate(dateString);
+////			upTable1(list);
+//			upTable1();
+	}
 	}
 
-	public boolean themPhong() {
+	public boolean themPhong() throws ClassNotFoundException, IOException {
 		Object[] obj = new Object[6];
 		if (ktraDuLieu()) {
-			Dao_PhatSinhMa maP = new Dao_PhatSinhMa();
-			String ma = maP.getMaPhongCuoi();
+//			Dao_PhatSinhMa maP = new Dao_PhatSinhMa();
+//			String ma = maP.getMaPhongCuoi();
 			String tenLoaiPhong = String.valueOf(comboLoaiPhong.getSelectedItem());
 			int sucChua = Integer.parseInt((String) comboSucChua.getSelectedItem());
 			String tenTinhTang = String.valueOf(comboTinhTrang.getSelectedItem());
 			float Gia = Float.parseFloat(txtGia.getText());
 			float dienTich = Float.parseFloat(txtDienTich.getText());
-			String maLP = null;
+			int maLP ;
 			if (tenLoaiPhong.equals("Phòng thường")) {
-				maLP = "NOR";
+				maLP = 2;
 			} else
-				maLP = "VIP";
-			LoaiPhong lp = new LoaiPhong(maLP);
-			TinhTrangPhong tt = new TinhTrangPhong("EMPT");
-			Phong p = new Phong(ma, lp, sucChua, Gia, tt, dienTich);
-			if (!dsPhong.themPhong(p)) {
+				maLP = 1;
+			
+			LoaiPhong lp = dsPhong.getLoaiPhongTheoMa(maLP);
+			
+			TinhTrangPhong tt1 = new TinhTrangPhong();
+			List<TinhTrangPhong> list = dsPhong.getDSTinhTrangPhong();
+			for (TinhTrangPhong a : list) {
+				if (a.getTenTinhTrangPhong().equals(tenTinhTang)) {
+					tt1 = a;
+				} 
+			}
+			Phong p = new Phong( sucChua,Gia, dienTich, tt1, lp);
+			dsPhong.themPhong(p);
+			List<Phong> dsPhongg = dsPhong.getDSPhong();
+			Phong p1 = dsPhongg.get(dsPhongg.size() - 1);
 				JOptionPane.showMessageDialog(this, "Thêm thành công");
-				obj[0] = ma;
-				obj[1] = tenTinhTang;
+				obj[0] = p1.getMaPhong();
+				obj[1] = tt1.getTenTinhTrangPhong();
 				obj[2] = sucChua;
-				obj[3] = tenLoaiPhong;
+				obj[3] = lp.getTenLoaiPhong();
 				obj[4] = df.format(Gia);
 				obj[5] = dfs.format(dienTich);
 				model1.addRow(obj);
 				xoaTrang();
-				return true;
-			}
 		}
 		return false;
 	}
-
-	public boolean suaPhong() {
+//
+	public boolean suaPhong() throws HeadlessException, ClassNotFoundException, IOException {
 		int row = tableDSPhong1.getSelectedRow();
 		if (row == -1) {
 			JOptionPane.showMessageDialog(this, "Chọn phòng cần sửa");
 		} else {
-			Object[] obj = new Object[7];
+			Object[] obj = new Object[6];
 			if (ktraDuLieu()) {
-				String ma = tableDSPhong1.getValueAt(row, 0).toString();
+				int ma = (int) tableDSPhong1.getValueAt(row, 0);
 				String tenLoaiPhong = String.valueOf(comboLoaiPhong.getSelectedItem());
 				int sucChua = Integer.parseInt((String) comboSucChua.getSelectedItem());
 				String tenTinhTang = String.valueOf(comboTinhTrang.getSelectedItem());
 				float Gia = Float.parseFloat(txtGia.getText());
 				float dienTich = Float.parseFloat(txtDienTich.getText());
-				String maLP = null;
+				int maLP ;
 				if (tenLoaiPhong.equals("Phòng thường")) {
-					maLP = "NOR";
+					maLP = 2;
 				} else
-					maLP = "VIP";
-				LoaiPhong lp = new LoaiPhong(maLP);
-				TinhTrangPhong tt = new TinhTrangPhong("EMPT");
-				Phong p = new Phong(ma, lp, sucChua, Gia, tt, dienTich);
+					maLP = 1;
+//				LoaiPhong lp = new LoaiPhong();
+//				TinhTrangPhong tt = new TinhTrangPhong();
+				LoaiPhong lp = dsPhong.getLoaiPhongTheoMa(maLP);
+				
+				TinhTrangPhong tt1 = new TinhTrangPhong();
+				List<TinhTrangPhong> list = dsPhong.getDSTinhTrangPhong();
+				for (TinhTrangPhong a : list) {
+					if (a.getTenTinhTrangPhong().equals(tenTinhTang)) {
+						tt1 = a;
+					} 
+				}
 				obj[0] = ma;
-				obj[1] = tt.getTenTinhTrangPhong();
+				obj[1] = tt1.getTenTinhTrangPhong();
 				obj[2] = sucChua;
-				obj[3] = tenLoaiPhong;
+				obj[3] = lp.getTenLoaiPhong();
 				obj[4] = df.format(Gia);
 				obj[5] = dfs.format(dienTich);
-				if (!dsPhong.suaPhong(p)) {
+				Phong p = new Phong(ma, sucChua,Gia, dienTich, tt1, lp);
+
+				if (dsPhong.updatePhong(p)) {
 					JOptionPane.showMessageDialog(this, "Sửa thành công");
+					System.out.println("sua thanh cong1");
 					tableDSPhong1.setValueAt(obj[2], row, 2);
+					System.out.println("sua thanh cong2");
 					tableDSPhong1.setValueAt(obj[3], row, 3);
+					System.out.println("sua thanh cong3");
 					tableDSPhong1.setValueAt(obj[4], row, 4);
+					System.out.println("sua thanh cong4");
 					tableDSPhong1.setValueAt(obj[5], row, 5);
+					System.out.println("sua thanh cong5");
 					xoaTrang();
 					return true;
 				}
 			}
 		}
-
 		return false;
 	}
 
-	public void xoaTrang() {
+	public void xoaTrang() throws ClassNotFoundException, IOException {
 		txtGia.setText("");
 		txtMaPhong.setText("Tìm kiếm phòng theo mã phòng");
 		txtMaPhong.setForeground(Color.GRAY);
 		txtDienTich.setText("");
 		tableDSPhong1.clearSelection();
-		comboTinhTrang.setSelectedIndex(1);
+		comboTinhTrang.setSelectedIndex(0);
 		comboSucChua.setSelectedIndex(0);
 		comboLoaiPhong.setSelectedIndex(0);
 		lbTB.setText("");
-		clearTable();
-		ArrayList<Phong> list = dsDp.getAllRoomByDate(dateString);
-		upTable1(list);
+//		clearTable();
+//		ArrayList<Phong> list = dsDp.getAllRoomByDate(dateString);
+//		upTable1(list);
+//		upTable1();
+	}
+//
+//	public void upTable1(ArrayList<Phong> arr) {
+//		df = new DecimalFormat("###,### VNĐ");
+//		dfs = new DecimalFormat("### M2");
+//		model1.setRowCount(0);
+//		for (Phong p : arr) {
+//			Object[] obj = new Object[6];
+//			obj[0] = p.getMaPhong();
+//			obj[1] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//			obj[2] = p.getSucChua();
+//			obj[3] = p.getMaLoaiPhong().getTenLoaiPhong();
+//			obj[4] = df.format(p.getGiaPhong());
+//			obj[5] = dfs.format(p.getDienTich());
+//			model1.addRow(obj);
+//		}
+		
+		public void upTable1() throws ClassNotFoundException, IOException {
+			df = new DecimalFormat("###,### VNĐ");
+			dfs = new DecimalFormat("### M2");
+			List<Phong> dsPhongg = dsPhong.getDSPhong();
+			List<TinhTrangPhong> list = dsPhong.getDSTinhTrangPhong();
+			List<LoaiPhong> list2 = dsPhong.getDSLoaiPhong();
+			model1.setRowCount(0);
+			for (Phong p : dsPhongg) {
+				Object[] obj = new Object[6];
+				obj[0] = p.getMaPhong();
+				obj[1] = list.get(p.getMaTinhTrangPhong().getMaTinhTrangPhong() - 1).getTenTinhTrangPhong();
+				obj[2] = p.getSucChua();
+				obj[3] = list2.get(p.getMaLoaiPhong().getMaLoaiPhong() - 1).getTenLoaiPhong();
+				obj[4] = df.format(p.getGiaPhong());
+				obj[5] = dfs.format(p.getDienTich());
+				model1.addRow(obj);
+			}
 	}
 
-	public void upTable1(ArrayList<Phong> arr) {
-		df = new DecimalFormat("###,### VNĐ");
-		dfs = new DecimalFormat("### M2");
-		model1.setRowCount(0);
-		for (Phong p : arr) {
-			Object[] obj = new Object[6];
-			obj[0] = p.getMaPhong().trim();
-			obj[1] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
-			obj[2] = p.getSucChua();
-			obj[3] = p.getMaLoaiPhong().getTenLoaiPhong();
-			obj[4] = df.format(p.getGiaPhong());
-			obj[5] = dfs.format(p.getDienTich());
-			model1.addRow(obj);
-		}
-	}
+// up cpmbox
 
-	// them phong
-
-	public void upCombobox() {
-		List<TinhTrangPhong> list = dsPhong.getDSTinhTrang();
+	public void upCombobox() throws ClassNotFoundException, IOException {
+		List<TinhTrangPhong> list = dsPhong.getDSTinhTrangPhong();
 		int i = 0;
 		for (TinhTrangPhong s : list) {
 			comboTinhTrang.addItem(s.getTenTinhTrangPhong());
@@ -542,43 +618,46 @@ public class Frm_QuanLyPhong extends JFrame implements ActionListener, MouseList
 		}
 	}
 
-	public void upCombobox2() {
+	public void upCombobox2() throws ClassNotFoundException, IOException {
 		int i = 0;
-		List<LoaiPhong> list = dsPhong.getDSLoatPhong();
+		List<LoaiPhong> list = dsPhong.getDSLoaiPhong();
 		for (LoaiPhong a : list) {
 			comboLoaiPhong.addItem(a.getTenLoaiPhong());
 			comboLoaiPhong.setSelectedIndex(i);
 		}
 	}
 
-	public void setTextTB() throws ParseException {
+	public void setTextTB() throws ParseException, ClassNotFoundException, IOException {
 		df = new DecimalFormat("###,### VNĐ");
 		dfs = new DecimalFormat("### M2");
 		int row = tableDSPhong1.getSelectedRow();
 		txtGia.setText(df.parse(tableDSPhong1.getValueAt(row, 4).toString()) + "");
 		txtDienTich.setText(dfs.parse(tableDSPhong1.getValueAt(row, 5).toString()) + "");
-
-		int i = 2;
-		if (tableDSPhong1.getValueAt(row, 1).toString().equals("Phòng trống")) {
-			i = 1;
-		} else if (tableDSPhong1.getValueAt(row, 1).toString().equals("Phòng đã đặt")) {
-			i = 0;
+		
+		List<TinhTrangPhong> list = dsPhong.getDSTinhTrangPhong();
+		List<LoaiPhong> list2 = dsPhong.getDSLoaiPhong();
+		
+		for (TinhTrangPhong a : list) {
+			if (a.getTenTinhTrangPhong().equals(tableDSPhong1.getValueAt(row, 1).toString())) {
+				comboTinhTrang.setSelectedIndex(a.getMaTinhTrangPhong() - 1);
+			}
 		}
-		comboTinhTrang.setSelectedIndex(i);
 
 		int a = 1;
 		if (tableDSPhong1.getValueAt(row, 2).toString().equals("10")) {
 			a = 0;
 		} else if (tableDSPhong1.getValueAt(row, 2).toString().equals("20")) {
 			a = 2;
-		}
+		} else
+			a = 1;
 		comboSucChua.setSelectedIndex(a);
-
-		int b = 0;
-		if (tableDSPhong1.getValueAt(row, 3).toString().equals("Phòng VIP")) {
-			b = 1;
+		
+		for (LoaiPhong b : list2) {
+			if (b.getTenLoaiPhong().equals(tableDSPhong1.getValueAt(row, 3).toString())) {
+				comboLoaiPhong.setSelectedIndex(b.getMaLoaiPhong() - 1);
+			}
 		}
-		comboLoaiPhong.setSelectedIndex(b);
+//	
 	}
 
 	public void showMessage(String message) {
@@ -616,113 +695,116 @@ public class Frm_QuanLyPhong extends JFrame implements ActionListener, MouseList
 	}
 
 	// Lọc phòng theo loại
-	public void locTheoLoaiPhongVIP() {
-		clearTable();
-		df = new DecimalFormat("###,### VNĐ");
-		dfs = new DecimalFormat("##,## M2");
-//		ArrayList<Phong> list = dsPhong.getDSPhong();
-		ArrayList<Phong> listN = dsDp.getAllRoomByType(dateString, "VIP");
-		for (Phong p : listN) {
-			if (p.getMaLoaiPhong().getMaLoaiPhong().equals("VIP")) {
-				Object[] obj = new Object[6];
-				obj[0] = p.getMaPhong().trim();
-				obj[1] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
-				obj[2] = p.getSucChua();
-				obj[3] = p.getMaLoaiPhong().getTenLoaiPhong();
-				obj[4] = df.format(p.getGiaPhong());
-				obj[5] = dfs.format(p.getDienTich());
-				model1.addRow(obj);
-			}
-		}
-	}
-
-	// Lọc phòng theo mã phòng
-	public void locTheoMaPhong() {
-		clearTable();
-		df = new DecimalFormat("###,### VNĐ");
-		dfs = new DecimalFormat("##,## M2");
-		String maphong = txtMaPhong.getText().toString();
-		Phong p = dsPhong.getPhongTheoMa(maphong);
-		Object[] obj = new Object[6];
-		obj[0] = p.getMaPhong().trim();
-		obj[1] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
-		obj[2] = p.getSucChua();
-		obj[3] = p.getMaLoaiPhong().getTenLoaiPhong();
-		obj[4] = df.format(p.getGiaPhong());
-		obj[5] = dfs.format(p.getDienTich());
-		model1.addRow(obj);
-
-	}
-
-	// Kiểm tra phòng
-	public void kiemTraPhong() {
-		df = new DecimalFormat("######");
-		dfs = new DecimalFormat("##,##");
-		String maPhong = txtMaPhong.getText();
-		Phong p = dsPhong.getPhongTheoMa(maPhong);
-		if (maPhong.equals("Tìm kiếm phòng theo mã phòng") || maPhong.equals("")) {
-			JOptionPane.showMessageDialog(this, "Vui lòng nhập mã phòng ! \nMã phòng không được để trống");
-			txtMaPhong.requestFocus();
-		} else if (!maPhong.matches("[MP]{2}\\d{3}")) {
-			JOptionPane.showMessageDialog(this, "Mã phòng phải bắt đầu MP theo sau là 3 kí số. \nVD: MP001");
-			txtMaPhong.requestFocus();
-		}
-		else if (p != null) {
-
-			int i = 2;
-			if (p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("BOOK")) {
-				i = 0;
-			} else if (p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("EMPT")) {
-				i = 1;
-			}
-			comboTinhTrang.setSelectedIndex(i);
-
-			int indexSc = 0;
-			if (p.getSucChua() == 15) {
-				indexSc = 1;
-			} else if (p.getSucChua() == 20) {
-				indexSc = 2;
-			}
-			comboSucChua.setSelectedIndex(indexSc);
-
-			int indexLp = 0;
-			if (p.getMaLoaiPhong().getMaLoaiPhong().equals("VIP")) {
-				indexLp = 1;
-			}
-			comboLoaiPhong.setSelectedIndex(indexLp);
-			txtDienTich.setText(dfs.format(p.getDienTich()));
-			txtGia.setText(df.format(p.getGiaPhong()));
-			locTheoMaPhong();
-		}
-
-		else {
-			JOptionPane.showMessageDialog(this, "Phòng chưa có trong hệ thống \n Thêm phòng mới!!!");
-			txtMaPhong.requestFocus();
-		}
-
-	}
-
-	// Lọc phòng theo loại
-	public void locTheoLoaiPhongThuong() {
-		clearTable();
-		df = new DecimalFormat("###,### VNĐ");
-		dfs = new DecimalFormat("##,## M2");
-//		ArrayList<Phong> list = dsPhong.getDSPhong();
-		ArrayList<Phong> listN = dsDp.getAllRoomByType(dateString, "NOR");
-		int i = 0;
-		for (Phong p : listN) {
-			if (p.getMaLoaiPhong().getMaLoaiPhong().equals("NOR")) {
-				Object[] obj = new Object[6];
-				obj[0] = p.getMaPhong().trim();
-				obj[1] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
-				obj[2] = p.getSucChua();
-				obj[3] = p.getMaLoaiPhong().getTenLoaiPhong();
-				obj[4] = df.format(p.getGiaPhong());
-				obj[5] = dfs.format(p.getDienTich());
-				model1.addRow(obj);
-			}
-		}
-	}
+//	public void locTheoLoaiPhongVIP() {
+//		clearTable();
+//		df = new DecimalFormat("###,### VNĐ");
+//		dfs = new DecimalFormat("##,## M2");
+////		ArrayList<Phong> list = dsPhong.getDSPhong();
+//		ArrayList<Phong> listN = dsDp.getAllRoomByType(dateString, "VIP");
+//		List<Phong> list = dsPhong.get
+//		
+//		
+//		for (Phong p : listN) {
+//			if (p.getMaLoaiPhong().getMaLoaiPhong().equals("VIP")) {
+//				Object[] obj = new Object[6];
+//				obj[0] = p.getMaPhong().trim();
+//				obj[1] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//				obj[2] = p.getSucChua();
+//				obj[3] = p.getMaLoaiPhong().getTenLoaiPhong();
+//				obj[4] = df.format(p.getGiaPhong());
+//				obj[5] = dfs.format(p.getDienTich());
+//				model1.addRow(obj);
+//			}
+//		}
+//	}
+//
+//	// Lọc phòng theo mã phòng
+//	public void locTheoMaPhong() {
+//		clearTable();
+//		df = new DecimalFormat("###,### VNĐ");
+//		dfs = new DecimalFormat("##,## M2");
+//		String maphong = txtMaPhong.getText().toString();
+//		Phong p = dsPhong.getPhongTheoMa(maphong);
+//		Object[] obj = new Object[6];
+//		obj[0] = p.getMaPhong().trim();
+//		obj[1] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//		obj[2] = p.getSucChua();
+//		obj[3] = p.getMaLoaiPhong().getTenLoaiPhong();
+//		obj[4] = df.format(p.getGiaPhong());
+//		obj[5] = dfs.format(p.getDienTich());
+//		model1.addRow(obj);
+//
+//	}
+//
+//	// Kiểm tra phòng
+//	public void kiemTraPhong() {
+//		df = new DecimalFormat("######");
+//		dfs = new DecimalFormat("##,##");
+//		String maPhong = txtMaPhong.getText();
+//		Phong p = dsPhong.getPhongTheoMa(maPhong);
+//		if (maPhong.equals("Tìm kiếm phòng theo mã phòng") || maPhong.equals("")) {
+//			JOptionPane.showMessageDialog(this, "Vui lòng nhập mã phòng ! \nMã phòng không được để trống");
+//			txtMaPhong.requestFocus();
+//		} else if (!maPhong.matches("[MP]{2}\\d{3}")) {
+//			JOptionPane.showMessageDialog(this, "Mã phòng phải bắt đầu MP theo sau là 3 kí số. \nVD: MP001");
+//			txtMaPhong.requestFocus();
+//		}
+//		else if (p != null) {
+//
+//			int i = 2;
+//			if (p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("BOOK")) {
+//				i = 0;
+//			} else if (p.getMaTinhTrangPhong().getMaTinhTrangPhong().equals("EMPT")) {
+//				i = 1;
+//			}
+//			comboTinhTrang.setSelectedIndex(i);
+//
+//			int indexSc = 0;
+//			if (p.getSucChua() == 15) {
+//				indexSc = 1;
+//			} else if (p.getSucChua() == 20) {
+//				indexSc = 2;
+//			}
+//			comboSucChua.setSelectedIndex(indexSc);
+//
+//			int indexLp = 0;
+//			if (p.getMaLoaiPhong().getMaLoaiPhong().equals("VIP")) {
+//				indexLp = 1;
+//			}
+//			comboLoaiPhong.setSelectedIndex(indexLp);
+//			txtDienTich.setText(dfs.format(p.getDienTich()));
+//			txtGia.setText(df.format(p.getGiaPhong()));
+//			locTheoMaPhong();
+//		}
+//
+//		else {
+//			JOptionPane.showMessageDialog(this, "Phòng chưa có trong hệ thống \n Thêm phòng mới!!!");
+//			txtMaPhong.requestFocus();
+//		}
+//
+//	}
+//
+//	// Lọc phòng theo loại
+//	public void locTheoLoaiPhongThuong() {
+//		clearTable();
+//		df = new DecimalFormat("###,### VNĐ");
+//		dfs = new DecimalFormat("##,## M2");
+////		ArrayList<Phong> list = dsPhong.getDSPhong();
+//		ArrayList<Phong> listN = dsDp.getAllRoomByType(dateString, "NOR");
+//		int i = 0;
+//		for (Phong p : listN) {
+//			if (p.getMaLoaiPhong().getMaLoaiPhong().equals("NOR")) {
+//				Object[] obj = new Object[6];
+//				obj[0] = p.getMaPhong().trim();
+//				obj[1] = p.getMaTinhTrangPhong().getTenTinhTrangPhong();
+//				obj[2] = p.getSucChua();
+//				obj[3] = p.getMaLoaiPhong().getTenLoaiPhong();
+//				obj[4] = df.format(p.getGiaPhong());
+//				obj[5] = dfs.format(p.getDienTich());
+//				model1.addRow(obj);
+//			}
+//		}
+//	}
 
 	public void clearTable() {
 		while (tableDSPhong1.getRowCount() > 0) {
@@ -769,11 +851,17 @@ public class Frm_QuanLyPhong extends JFrame implements ActionListener, MouseList
 		// TODO Auto-generated method stub
 		Object o = e.getSource();
 		if (o == lbIconSearch) {
-			kiemTraPhong();
+//			kiemTraPhong();
 		} else {
 			try {
 				setTextTB();
 			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}

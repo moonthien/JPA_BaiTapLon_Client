@@ -15,108 +15,135 @@ import entitys.KhachHang;
 import entitys.LoaiKhachHang;
 
 public class Client_KhachHangDao {
-	
-	private static ObjectOutputStream out ;
+
+	private static ObjectOutputStream out;
 	private static ObjectInputStream in;
 
-	
-	public Client_KhachHangDao() throws  IOException {
-	
-			try {
-				Socket socket = new Socket("DESKTOP-R9M9IMC", 3481);
-				out = new ObjectOutputStream(socket.getOutputStream());
-				out.flush();
-				in = new ObjectInputStream(socket.getInputStream());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			
+	public Client_KhachHangDao() throws IOException {
+
+		try {
+			Socket socket = new Socket("DESKTOP-R9M9IMC", 3481);
+			out = new ObjectOutputStream(socket.getOutputStream());
+			out.flush();
+			in = new ObjectInputStream(socket.getInputStream());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
+	//getDSKH
 	public List<KhachHang> getDSKH() throws IOException, ClassNotFoundException {
-			out.writeUTF("getDSKH");
-			out.flush();
-			List<KhachHang> list = (List<KhachHang>) in.readObject();
-			return list;
+		out.writeUTF("getDSKH");
+		out.flush();
+		List<KhachHang> list = (List<KhachHang>) in.readObject();
+		return list;
 	}
-	
+
+	//getDSLKH
 	public List<LoaiKhachHang> getDSLKH() throws IOException, ClassNotFoundException {
 		out.writeUTF("getDSLKH");
 		out.flush();
 		List<LoaiKhachHang> list = (List<LoaiKhachHang>) in.readObject();
 		return list;
 	}
-	
+
+	// getLoaiKhachHang
 	public LoaiKhachHang getLoaiKhachHang(int id) throws IOException, ClassNotFoundException {
 		out.writeUTF("getLoaiKhachHang");
 		out.writeInt(id);
 		out.flush();
 		return (LoaiKhachHang) in.readObject();
 	}
-	
+
+	// themKhachHang
 	public boolean themKhachHang(KhachHang KhachHang) throws IOException, ClassNotFoundException {
 		out.writeUTF("themKhachHang");
 		out.flush();
-		
+
 		out.writeObject(KhachHang);
 		out.flush();
 		boolean result = in.readBoolean();
 		System.out.println(result);
-		return result;	
+		return result;
 	}
 
+	//updateKhachHang
 	public boolean updateKhachHang(KhachHang KhachHang) throws IOException, ClassNotFoundException {
 		out.writeUTF("updateKhachHang");
-        out.flush();
-        out.writeObject(KhachHang);
-        out.flush();
-        boolean result = in.readBoolean();
-        System.out.println(result);
-        return result;
-        }
+		out.flush();
+		out.writeObject(KhachHang);
+		out.flush();
+		boolean result = in.readBoolean();
+		System.out.println(result);
+		return result;
+	}
+
+	//getKhachHangTheoSDT
+	public KhachHang getKhachHangTheoSDT(String sdt) throws IOException, ClassNotFoundException {
+		out.writeUTF("getKhachHangTheoSDT");
+		out.flush();
+		out.writeUTF(sdt);
+		out.flush();
+		return (KhachHang) in.readObject();
+	}
+
+	// getKhachHangTheoMa
+	public KhachHang getKhachHangTheoMa(int id) throws IOException, ClassNotFoundException {
+		out.writeUTF("getKhachHangTheoMa");
+		out.flush();
+		out.writeInt(id);
+		out.flush();
+		return (KhachHang) in.readObject();
+	}
+
+	// getDTLTheoMa
+	public int getDTLTheoMa(int id) throws IOException, ClassNotFoundException {
+		out.writeUTF("getDTLTheoMa");
+		out.flush();
+		out.writeInt(id);
+		out.flush();
+		return in.readInt();
+	}
+
 	public static void main(String[] args) throws ClassNotFoundException, IOException {
-		
+
 		try {
 			Client_KhachHangDao client = new Client_KhachHangDao();
 			List<LoaiKhachHang> list = client.getDSLKH();
-			
+		    KhachHang kh = client.getKhachHangTheoMa(16);
+		    System.out.println(kh.getLoaiKhachHang().getTenLoaiKhachHang());
+//
+//			List<KhachHang> lists = client.getDSKH();
+//			for (KhachHang khachHang : lists) {
+//				System.out.println(khachHang.getLoaiKhachHang().getTenLoaiKhachHang());
+//
+//				
+//			}
+//
+//			LoaiKhachHang kh = client.getLoaiKhachHang(1);
+//			System.out.println("---------------------------------------------------------------");
+//			System.out.println(kh);
 
-			List<KhachHang> lists = client.getDSKH();
-			for (KhachHang khachHang : lists) {
-				System.out.println(khachHang);
-				
-				client.updateKhachHang(khachHang);
-			}
-			
-			LoaiKhachHang kh = client.getLoaiKhachHang(1);
-			System.out.println("---------------------------------------------------------------");
-			System.out.println(kh);
-			
-			
 		} catch (IOException e) {
 			// TODO: handle exception
 			e.printStackTrace();
-		}finally {
-            // Đảm bảo rằng ObjectOutputStream và ObjectInputStream được đóng
-            if (out != null) {
-                out.close();
-            }
-            if (in != null) {
-                in.close();
-            }
-        }
-		
+		} finally {
+			// Đảm bảo rằng ObjectOutputStream và ObjectInputStream được đóng
+			if (out != null) {
+				out.close();
+			}
+			if (in != null) {
+				in.close();
+			}
+		}
+
 //		List<KhachHang> lists = client.getDSKH();
 //		for (KhachHang khachHang : lists) {
 //			System.out.println(khachHang);
 //		}
-	
-		
 
-		
-		
 	}
 //	}
 //	public static void main(String[] args) {
